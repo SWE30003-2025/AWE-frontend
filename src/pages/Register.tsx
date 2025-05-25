@@ -1,16 +1,21 @@
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { saveUser, User } from "../api";
+
+interface RegisterForm extends User {
+  password: string;
+}
 
 export default function Register() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState<RegisterForm>({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = e => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     // Simple frontend validation
     if (!form.name || !form.email || !form.password) {
@@ -18,7 +23,7 @@ export default function Register() {
       return;
     }
     // Save user info to localStorage as "registered"
-    localStorage.setItem("user", JSON.stringify({ ...form }));
+    saveUser(form);
     // Optionally show a success message
     alert("Registration successful! Please log in.");
     // Redirect to login page

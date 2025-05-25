@@ -1,7 +1,12 @@
 import { useCart } from '../contexts/CartContext';
+import { Product } from '../api';
 import toast from 'react-hot-toast';
 
-export default function ProductCard({ product }) {
+interface ProductCardProps {
+  product: Product;
+}
+
+export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
 
   return (

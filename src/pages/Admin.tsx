@@ -1,11 +1,18 @@
-import { useState, useEffect } from "react";
-import { getProducts, saveProducts } from "../api";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { getProducts, saveProducts, Product } from "../api";
 import toast from 'react-hot-toast';
 
+interface FormData {
+  name: string;
+  description: string;
+  price: string;
+  image: string;
+}
+
 export default function Admin() {
-  const [products, setProducts] = useState([]);
-  const [form, setForm] = useState({ name: "", description: "", price: "", image: "" });
-  const [editingId, setEditingId] = useState(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [form, setForm] = useState<FormData>({ name: "", description: "", price: "", image: "" });
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   useEffect(() => {
     setProducts(getProducts());
@@ -15,11 +22,11 @@ export default function Admin() {
     saveProducts(products);
   }, [products]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleAdd = (e) => {
+  const handleAdd = (e: FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.price) return;
     setProducts([
@@ -30,22 +37,22 @@ export default function Admin() {
     toast.success("Product added!");
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: number) => {
     setProducts(products.filter(p => p.id !== id));
     toast.success("Product deleted!");
   };
 
-  const handleEdit = (product) => {
+  const handleEdit = (product: Product) => {
     setEditingId(product.id);
     setForm({
       name: product.name,
       description: product.description,
-      price: product.price,
+      price: product.price.toString(),
       image: product.image,
     });
   };
 
-  const handleUpdate = (e) => {
+  const handleUpdate = (e: FormEvent) => {
     e.preventDefault();
     setProducts(products.map(p => p.id === editingId ? { ...p, ...form, price: parseFloat(form.price) } : p));
     setEditingId(null);
@@ -88,7 +95,7 @@ export default function Admin() {
           <p className="text-gray-500">No products.</p>
         ) : (
           <ul>
-            {products.map(prod => (
+            {products.map((prod: Product) => (
               <li key={prod.id} className="flex justify-between items-center border-b py-2">
                 <span>{prod.name} - ${prod.price}</span>
                 <div className="flex gap-2">

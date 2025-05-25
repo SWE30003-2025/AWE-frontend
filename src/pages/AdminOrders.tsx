@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { Order, getOrders } from "../api";
 
 export default function AdminOrders() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    const allOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+    const allOrders = getOrders();
     setOrders(allOrders);
   }, []);
 
@@ -15,7 +16,7 @@ export default function AdminOrders() {
         <p className="text-gray-600 text-center">No orders yet.</p>
       ) : (
         <div className="space-y-6">
-          {orders.map(order => (
+          {orders.map((order: Order) => (
             <div key={order.id} className="bg-white rounded shadow p-4">
               <div className="font-bold mb-1">Order ID: {order.id} — Placed by: {order.user}</div>
               <div className="mb-1">Order Date: {order.date}</div>

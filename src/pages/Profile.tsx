@@ -1,14 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { getUser, saveUser, User } from "../api";
 import toast from 'react-hot-toast';
 
+interface ProfileForm {
+  name: string;
+  email: string;
+}
+
 export default function Profile() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "" });
+  const [form, setForm] = useState<ProfileForm>({ name: "", email: "" });
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const storedUser = getUser();
     const loggedInUser = localStorage.getItem("loggedInUser");
     if (storedUser && loggedInUser === storedUser.name) {
       setUser(storedUser);
@@ -16,20 +22,23 @@ export default function Profile() {
     }
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSave = (e) => {
+  const handleSave = (e: FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email) {
       setMessage("Name and email are required.");
       return;
     }
+    if (!user) return;
+    
     // Update localStorage "user" and "loggedInUser"
-    localStorage.setItem("user", JSON.stringify({ ...user, ...form }));
+    const updatedUser = { ...user, ...form };
+    saveUser(updatedUser);
     localStorage.setItem("loggedInUser", form.name);
-    setUser({ ...user, ...form });
+    setUser(updatedUser);
     setEditing(false);
     setMessage("");
     toast.success("Profile updated!");

@@ -1,19 +1,25 @@
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { getUser } from "../api";
+
+interface LoginForm {
+  email: string;
+  password: string;
+}
 
 export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = e => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     // Simulate login by checking localStorage "user"
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const storedUser = getUser();
     if (!form.email || !form.password) {
       setError("Please enter your email and password.");
       return;

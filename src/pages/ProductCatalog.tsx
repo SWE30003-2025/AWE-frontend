@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import ProductCard from '../components/ProductCard';
-import { getProducts, saveProducts } from '../api';
+import { getProducts, saveProducts, Product } from '../api';
 
 export default function ProductCatalog() {
   const [search, setSearch] = useState("");
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     let productsFromStorage = getProducts();
@@ -40,7 +40,7 @@ export default function ProductCatalog() {
 
   // TODO: For backend: Call getProducts() as an async function and setProducts(await getProducts())
 
-  const filteredProducts = products.filter(product =>
+  const filteredProducts = products.filter((product: Product) =>
     product.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -56,7 +56,7 @@ export default function ProductCatalog() {
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {filteredProducts.length > 0 ? (
-          filteredProducts.map(product => (
+          filteredProducts.map((product: Product) => (
             <ProductCard key={product.id} product={product} />
           ))
         ) : (

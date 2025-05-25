@@ -1,12 +1,21 @@
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
+import { Product, CartItem } from "../api";
 
-const CartContext = createContext();
+interface CartContextType {
+  cart: CartItem[];
+  addToCart: (product: Product) => void;
+  removeFromCart: (id: number) => void;
+  updateQuantity: (id: number, qty: number) => void;
+  cartCount: number;
+}
 
-export function CartProvider({ children }) {
-  const [cart, setCart] = useState([]);
+const CartContext = createContext<CartContextType | undefined>(undefined);
+
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   // Add product to cart (if it exists, increase quantity)
-  const addToCart = (product) => {
+  const addToCart = (product: Product) => {
     setCart((prev) => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
@@ -21,12 +30,12 @@ export function CartProvider({ children }) {
   };
 
   // Remove item by ID
-  const removeFromCart = (id) => {
+  const removeFromCart = (id: number) => {
     setCart((prev) => prev.filter(item => item.id !== id));
   };
 
   // Update quantity
-  const updateQuantity = (id, qty) => {
+  const updateQuantity = (id: number, qty: number) => {
     setCart((prev) =>
       prev.map(item =>
         item.id === id ? { ...item, quantity: qty } : item
@@ -42,8 +51,12 @@ export function CartProvider({ children }) {
       {children}
     </CartContext.Provider>
   );
-}
+} 
 
 export function useCart() {
-  return useContext(CartContext);
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
 }

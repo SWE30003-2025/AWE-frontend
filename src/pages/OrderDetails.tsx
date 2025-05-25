@@ -1,14 +1,15 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { getOrders, Order } from "../api";
 
 export default function OrderDetails() {
-  const { id } = useParams();
-  const [order, setOrder] = useState(null);
+  const { id } = useParams<{ id: string }>();
+  const [order, setOrder] = useState<Order | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const allOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-    const found = allOrders.find(o => o.id === Number(id));
+    const allOrders = getOrders();
+    const found = allOrders.find((o: Order) => o.id === Number(id));
     if (!found) {
       // If not found, redirect or show a message
       navigate("/my-orders");
