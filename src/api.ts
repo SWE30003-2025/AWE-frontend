@@ -78,3 +78,4 @@ export function saveUser(user: User): void {
   // TODO: For backend: Replace with API call (e.g., axios.post('/api/user/', user) or PATCH)
   localStorage.setItem("user", JSON.stringify(user));
 }
+
