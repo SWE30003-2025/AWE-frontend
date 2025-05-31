@@ -19,6 +19,13 @@ export default function Navbar() {
               AWE Shop
             </Link>
           </div>
+
+          <div className="flex items-center space-x-4">
+            <Link to="/catalog" className="text-white hover:text-gray-900">
+              Products
+            </Link>
+          </div>
+
           <div className="flex items-center space-x-4">
             <Link to="/cart" className="text-white hover:text-gray-900 relative">
               Cart ({cartItemCount})
