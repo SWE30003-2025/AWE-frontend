@@ -1,6 +1,7 @@
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../api";
+import { login } from "../api";
+import toast from 'react-hot-toast';
 
 interface LoginForm {
   email: string;
@@ -9,61 +10,52 @@ interface LoginForm {
 
 export default function Login() {
   const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // Simulate login by checking localStorage "user"
-    const storedUser = getUser();
-    if (!form.email || !form.password) {
-      setError("Please enter your email and password.");
-      return;
+    try {
+      const { user } = await login(form.email, form.password);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("loggedInUser", user.name);
+      toast.success("Logged in successfully!");
+      navigate("/");
+    } catch (error) {
+      toast.error("Invalid email or password");
     }
-    if (!storedUser || storedUser.email !== form.email || storedUser.password !== form.password) {
-      setError("Invalid email or password.");
-      return;
-    }
-    // Save login state (e.g., "isLoggedIn" flag or token)
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("loggedInUser", storedUser.name);
-    // Redirect to homepage (or dashboard)
-    navigate("/");
-    window.location.reload(); // reload to update Navbar instantly
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 bg-white p-8 rounded shadow">
-      <h2 className="text-2xl font-semibold mb-6 text-center">Login</h2>
-      {error && <div className="bg-red-100 text-red-700 px-4 py-2 mb-4 rounded">{error}</div>}
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 border rounded"
-          value={form.email}
-          onChange={handleChange}
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 border rounded"
-          value={form.password}
-          onChange={handleChange}
-        />
-        <button type="submit" className="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800 transition">
+        <div>
+          <label className="block text-gray-700 mb-2">Email</label>
+          <input
+            type="email"
+            value={form.email}
+            onChange={e => setForm({ ...form, email: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-2">Password</label>
+          <input
+            type="password"
+            value={form.password}
+            onChange={e => setForm({ ...form, password: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        >
           Login
         </button>
       </form>
-      <div className="mt-4 text-center">
-        Don't have an account? <a href="/register" className="text-blue-700 underline">Register</a>
-      </div>
     </div>
   );
 }

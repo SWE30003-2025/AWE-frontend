@@ -1,13 +1,24 @@
+import axios from 'axios';
+
+// Create axios instance with base URL
+const api = axios.create({
+  baseURL: "http://localhost:8000",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 // ================================
 // Types and Interfaces
 // ================================
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   description: string;
   price: number;
-  image: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CartItem extends Product {
@@ -38,44 +49,106 @@ export interface User {
 // Product APIs
 // ================================
 
-export function getProducts(): Product[] {
-  // TODO: For backend: Replace with API call (e.g., axios.get('/api/products/'))
-  const products = localStorage.getItem("products");
-  return products ? JSON.parse(products) : [];
+export async function getProducts(): Promise<Product[]> {
+  try {
+    const response = await api.get("/api/product");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return [];
+  }
 }
 
-export function saveProducts(products: Product[]): void {
-  // TODO: For backend: Replace with API call (e.g., axios.post('/api/products/', products) or PATCH)
-  localStorage.setItem("products", JSON.stringify(products));
+export async function createProduct(product: Omit<Product, "id" | "created_at" | "updated_at">): Promise<Product> {
+  try {
+    const response = await api.post("/api/product", product);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating product:", error);
+    throw error;
+  }
+}
+
+export async function updateProduct(id: string, product: Partial<Product>): Promise<Product> {
+  try {
+    const response = await api.put(`/api/product/${id}`, product);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw error;
+  }
+}
+
+export async function deleteProduct(id: string): Promise<void> {
+  try {
+    await api.delete(`/api/product/${id}`);
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    throw error;
+  }
 }
 
 // ================================
 // Order APIs
 // ================================
 
-export function getOrders(): Order[] {
-  // TODO: For backend: Replace with API call (e.g., axios.get('/api/orders/'))
-  const orders = localStorage.getItem("orders");
-  return orders ? JSON.parse(orders) : [];
+export async function getOrders(): Promise<Order[]> {
+  try {
+    const response = await api.get("/api/order");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return [];
+  }
 }
 
-export function saveOrders(orders: Order[]): void {
-  // TODO: For backend: Replace with API call (e.g., axios.post('/api/orders/', orders) or PATCH)
-  localStorage.setItem("orders", JSON.stringify(orders));
+export async function createOrder(order: Omit<Order, "id" | "date">): Promise<Order> {
+  try {
+    const response = await api.post("/api/order", order);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating order:", error);
+    throw error;
+  }
 }
 
 // ================================
-// User APIs (frontend only)
+// User APIs
 // ================================
 
-export function getUser(): User | null {
-  // TODO: For backend: Replace with API call (e.g., axios.get('/api/user/'))
-  const user = localStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
+export async function login(email: string, password: string): Promise<{ user: User; token: string }> {
+  try {
+    const response = await api.post('/api/auth/login/', { email, password });
+    const { user, token } = response.data;
+    localStorage.setItem('token', token);
+    return { user, token };
+  } catch (error) {
+    console.error("Error logging in:", error);
+    throw error;
+  }
 }
 
-export function saveUser(user: User): void {
-  // TODO: For backend: Replace with API call (e.g., axios.post('/api/user/', user) or PATCH)
-  localStorage.setItem("user", JSON.stringify(user));
+export async function register(user: Omit<User, 'id'>): Promise<User> {
+  try {
+    const response = await api.post('/api/user/signup', user);
+    return response.data;
+  } catch (error) {
+    console.error("Error registering:", error);
+    throw error;
+  }
+}
+
+export async function getCurrentUser(): Promise<User | null> {
+  try {
+    const response = await api.get('/api/auth/user/');
+    return response.data;
+  } catch (error) {
+      console.error("Error fetching current user:", error);
+    return null;
+  }
+}
+
+export function logout(): void {
+  localStorage.removeItem('token');
 }
 

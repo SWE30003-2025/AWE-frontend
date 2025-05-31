@@ -1,70 +1,72 @@
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { saveUser, User } from "../api";
+import { register, User } from "../api";
+import toast from 'react-hot-toast';
 
-interface RegisterForm extends User {
+interface RegisterForm extends Omit<User, 'id'> {
   password: string;
 }
 
 export default function Register() {
-  const [form, setForm] = useState<RegisterForm>({ name: "", email: "", password: "" });
-  const [error, setError] = useState("");
+  const [form, setForm] = useState<RegisterForm>({
+    name: "",
+    email: "",
+    password: "",
+  });
   const navigate = useNavigate();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // Simple frontend validation
-    if (!form.name || !form.email || !form.password) {
-      setError("Please fill in all fields.");
-      return;
+    try {
+      await register(form);
+      toast.success("Registration successful! Please login.");
+      navigate("/login");
+    } catch (error) {
+      toast.error("Registration failed. Please try again.");
     }
-    // Save user info to localStorage as "registered"
-    saveUser(form);
-    // Optionally show a success message
-    alert("Registration successful! Please log in.");
-    // Redirect to login page
-    navigate("/login");
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 bg-white p-8 rounded shadow">
-      <h2 className="text-2xl font-semibold mb-6 text-center">Register</h2>
-      {error && <div className="bg-red-100 text-red-700 px-4 py-2 mb-4 rounded">{error}</div>}
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          name="name"
-          placeholder="Name"
-          className="w-full p-2 border rounded"
-          value={form.name}
-          onChange={handleChange}
-        />
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 border rounded"
-          value={form.email}
-          onChange={handleChange}
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 border rounded"
-          value={form.password}
-          onChange={handleChange}
-        />
-        <button type="submit" className="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800 transition">
+        <div>
+          <label className="block text-gray-700 mb-2">Name</label>
+          <input
+            type="text"
+            value={form.name}
+            onChange={e => setForm({ ...form, name: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-2">Email</label>
+          <input
+            type="email"
+            value={form.email}
+            onChange={e => setForm({ ...form, email: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-2">Password</label>
+          <input
+            type="password"
+            value={form.password}
+            onChange={e => setForm({ ...form, password: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        >
           Register
         </button>
       </form>
-      <div className="mt-4 text-center">
-        Already have an account? <a href="/login" className="text-blue-700 underline">Login</a>
-      </div>
     </div>
   );
 }

@@ -11,7 +11,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="bg-white shadow rounded-lg p-4 flex flex-col">
-      <img src={product.image} alt={product.name} className="h-32 object-contain mb-4" />
       <h3 className="font-semibold text-lg">{product.name}</h3>
       <p className="text-gray-600 mt-1">{product.description}</p>
       <div className="mt-auto">

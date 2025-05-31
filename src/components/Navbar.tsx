@@ -1,62 +1,49 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
-  const { cartCount } = useCart();
+  const { cart } = useCart();
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const loggedInUser = localStorage.getItem("loggedInUser");
   const navigate = useNavigate();
-  const userEmail = JSON.parse(localStorage.getItem("user") || "{}").email;
-  const isAdmin = isLoggedIn && userEmail === "admin@awe.com";
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("loggedInUser");
-    toast.success("Logged out!", { duration: 2000 });
-    setTimeout(() => {
-      window.location.reload();
-      navigate("/");
-    }, 2000);
-  };
+  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <nav className="bg-blue-800 p-4 text-white flex gap-8 items-center flex-wrap">
-      <Link to="/" className="font-bold text-xl">AWE Electronics</Link>
-      <Link to="/catalog" className="hover:underline">Products</Link>
-      <Link to="/cart" className="hover:underline">
-        Cart
-        {cartCount > 0 && (
-          <span className="bg-red-600 text-white rounded-full px-2 py-0.5 ml-2 text-xs">
-            {cartCount}
-          </span>
-        )}
-      </Link>
-      <div className="ml-auto flex items-center gap-4">
-        {isLoggedIn ? (
-          <>
-            <span className="font-semibold hidden sm:inline">Hi, {loggedInUser}</span>
-            <Link to="/my-orders" className="hover:underline">My Orders</Link>
-            <Link to="/profile" className="hover:underline">Profile</Link>
-            {isAdmin && (
+    <nav className="bg-blue-800 shadow-md">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link to="/" className="text-xl font-bold text-white">
+              AWE Shop
+            </Link>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Link to="/cart" className="text-white hover:text-gray-900 relative">
+              Cart ({cartItemCount})
+            </Link>
+            {isLoggedIn ? (
               <>
-                <Link to="/admin" className="hover:underline">Admin</Link>
-                <Link to="/admin-orders" className="hover:underline">All Orders</Link>
+                <span className="text-white">Welcome, {loggedInUser}</span>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("isLoggedIn");
+                    localStorage.removeItem("loggedInUser");
+                    navigate("/login");
+                  }}
+                  className="text-white hover:text-gray-900"
+                >
+                  Logout
+                </button>
               </>
+            ) : (
+              <Link to="/login" className="text-white hover:text-gray-900">
+                Login
+              </Link>
             )}
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded transition"
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="hover:underline">Login</Link>
-            <Link to="/register" className="hover:underline">Register</Link>
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </nav>
   );

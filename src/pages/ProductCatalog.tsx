@@ -1,48 +1,49 @@
 import { useState, useEffect } from "react";
 import ProductCard from '../components/ProductCard';
-import { getProducts, saveProducts, Product } from '../api';
+import { getProducts, Product } from '../api';
 
 export default function ProductCatalog() {
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let productsFromStorage = getProducts();
-    // If first load, initialize with defaults
-    if (productsFromStorage.length === 0) {
-      productsFromStorage = [
-        {
-          id: 1,
-          name: "Wireless Mouse",
-          description: "Ergonomic wireless mouse with 2.4GHz connectivity.",
-          price: 29.99,
-          image: "https://source.unsplash.com/featured/?mouse,tech"
-        },
-        {
-          id: 2,
-          name: "Mechanical Keyboard",
-          description: "RGB backlit mechanical keyboard with blue switches.",
-          price: 89.99,
-          image: "https://source.unsplash.com/featured/?keyboard,tech"
-        },
-        {
-          id: 3,
-          name: "Noise Cancelling Headphones",
-          description: "Bluetooth headphones with active noise cancellation.",
-          price: 199.99,
-          image: "https://source.unsplash.com/featured/?headphones,tech"
-        },
-      ];
-      saveProducts(productsFromStorage);
-    }
-    setProducts(productsFromStorage);
-  }, []);
+    const fetchProducts = async () => {
+      try {
+        const productsData = await getProducts();
+        setProducts(productsData);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load products. Please try again later.');
+        console.error('Error loading products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // TODO: For backend: Call getProducts() as an async function and setProducts(await getProducts())
+    fetchProducts();
+  }, []);
 
   const filteredProducts = products.filter((product: Product) =>
     product.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto text-center py-8">
+        <p>Loading products...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto text-center py-8 text-red-600">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto">

@@ -1,53 +1,61 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { getOrders, Order } from "../api";
 
 export default function OrderDetails() {
-  const { id } = useParams<{ id: string }>();
   const [order, setOrder] = useState<Order | null>(null);
+  const { id } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const allOrders = getOrders();
-    const found = allOrders.find((o: Order) => o.id === Number(id));
-    if (!found) {
-      // If not found, redirect or show a message
-      navigate("/my-orders");
-    } else {
+    const loadOrder = async () => {
+      const allOrders = await getOrders();
+      const found = allOrders.find((o: Order) => o.id === Number(id));
+      if (!found) {
+        navigate("/my-orders");
+        return;
+      }
       setOrder(found);
-    }
+    };
+    loadOrder();
   }, [id, navigate]);
 
   if (!order) {
-    return <div className="text-center mt-20">Loading order details...</div>;
+    return <div className="text-center mt-20">Loading...</div>;
   }
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 bg-white p-8 rounded shadow">
-      <h2 className="text-2xl font-bold mb-6 text-center">Order Details</h2>
-      <div className="mb-4">
-        <span className="font-semibold">Order ID:</span> {order.id}
+    <div className="max-w-4xl mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-6">Order Details</h2>
+      <div className="border rounded p-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-semibold">Order #{order.id}</h3>
+            <p className="text-gray-600">Customer: {order.user}</p>
+            <p className="text-gray-600">Date: {new Date(order.date).toLocaleDateString()}</p>
+          </div>
+          <div className="text-right">
+            <p className="font-bold text-blue-700">${order.total}</p>
+          </div>
+        </div>
+        <div className="mt-4">
+          <h4 className="font-semibold mb-2">Items:</h4>
+          <ul className="space-y-2">
+            {order.cart.map(item => (
+              <li key={item.id} className="flex justify-between">
+                <span>{item.name} x {item.quantity}</span>
+                <span>${(item.price * item.quantity).toFixed(2)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="mt-4">
+          <h4 className="font-semibold mb-2">Shipping:</h4>
+          <p>{order.shipping.name}</p>
+          <p>{order.shipping.address}</p>
+          <p>{order.shipping.city}, {order.shipping.postal}</p>
+        </div>
       </div>
-      <div className="mb-4">
-        <span className="font-semibold">Order Date:</span> {order.date}
-      </div>
-      <div className="mb-4">
-        <span className="font-semibold">Shipping Address:</span> {order.shipping.address}, {order.shipping.city}, {order.shipping.postal}
-      </div>
-      <div className="mb-4">
-        <span className="font-semibold">Items:</span>
-        <ul className="ml-4">
-          {order.cart.map(item => (
-            <li key={item.id}>{item.name} x {item.quantity} (${item.price} each)</li>
-          ))}
-        </ul>
-      </div>
-      <div className="mb-4 font-bold text-lg">
-        Total: ${order.cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
-      </div>
-      <Link to="/my-orders" className="inline-block mt-4 bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800">
-        Back to My Orders
-      </Link>
     </div>
   );
 }

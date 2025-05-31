@@ -1,52 +1,62 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { getOrders, Order } from "../api";
+import { Link } from "react-router-dom";
 
 export default function MyOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const loggedInUser = localStorage.getItem("loggedInUser");
 
   useEffect(() => {
-    const allOrders = getOrders();
-    // Filter orders for the current user
-    const userOrders = allOrders.filter((order: Order) => order.user === loggedInUser);
-    setOrders(userOrders);
+    const loadOrders = async () => {
+      const allOrders = await getOrders();
+      const userOrders = allOrders.filter((order: Order) => order.user === loggedInUser);
+      setOrders(userOrders);
+    };
+    loadOrders();
   }, [loggedInUser]);
 
   return (
-    <div className="max-w-4xl mx-auto mt-10">
-      <h2 className="text-2xl font-bold mb-6 text-center">My Orders</h2>
+    <div className="max-w-4xl mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-6">My Orders</h2>
       {orders.length === 0 ? (
-        <p className="text-gray-600 text-center">You haven't placed any orders yet.</p>
+        <p className="text-gray-600 text-center">No orders yet.</p>
       ) : (
-        <div className="space-y-6">
-          {orders.map((order: Order) => (
-            <div key={order.id} className="bg-white rounded shadow p-4">
-              <div className="flex justify-between items-start mb-2">
+        <div className="space-y-4">
+          {orders.map(order => (
+            <div key={order.id} className="border rounded p-4">
+              <div className="flex justify-between items-start">
                 <div>
-                  <div className="font-bold">Order #{order.id}</div>
-                  <div className="text-gray-600">Placed on {order.date}</div>
+                  <h3 className="font-semibold">Order #{order.id}</h3>
+                  <p className="text-gray-600">Date: {new Date(order.date).toLocaleDateString()}</p>
                 </div>
-                <Link
-                  to={`/order/${order.id}`}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                >
-                  View Details
-                </Link>
+                <div className="text-right">
+                  <p className="font-bold text-blue-700">${order.total}</p>
+                </div>
               </div>
-              <div className="mb-2">
-                <span className="font-semibold">Shipping:</span> {order.shipping.address}, {order.shipping.city}, {order.shipping.postal}
-              </div>
-              <div className="mb-2">
-                <span className="font-semibold">Items:</span>
-                <ul className="ml-4">
+              <div className="mt-4">
+                <h4 className="font-semibold mb-2">Items:</h4>
+                <ul className="space-y-2">
                   {order.cart.map(item => (
-                    <li key={item.id}>{item.name} x {item.quantity}</li>
+                    <li key={item.id} className="flex justify-between">
+                      <span>{item.name} x {item.quantity}</span>
+                      <span>${(item.price * item.quantity).toFixed(2)}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
-              <div className="font-bold">
-                Total: ${order.cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
+              <div className="mt-4">
+                <h4 className="font-semibold mb-2">Shipping:</h4>
+                <p>{order.shipping.name}</p>
+                <p>{order.shipping.address}</p>
+                <p>{order.shipping.city}, {order.shipping.postal}</p>
+              </div>
+              <div className="mt-4">
+                <Link
+                  to={`/order/${order.id}`}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  View Details
+                </Link>
               </div>
             </div>
           ))}

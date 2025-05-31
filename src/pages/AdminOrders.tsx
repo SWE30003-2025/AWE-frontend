@@ -1,44 +1,53 @@
-import { useEffect, useState } from "react";
-import { Order, getOrders } from "../api";
+import { useState, useEffect } from "react";
+import { getOrders, Order } from "../api";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    const allOrders = getOrders();
-    setOrders(allOrders);
+    const loadOrders = async () => {
+      const allOrders = await getOrders();
+      setOrders(allOrders);
+    };
+    loadOrders();
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto mt-10">
-      <h2 className="text-2xl font-bold mb-6 text-center">All Orders (Admin)</h2>
-      {orders.length === 0 ? (
-        <p className="text-gray-600 text-center">No orders yet.</p>
-      ) : (
-        <div className="space-y-6">
-          {orders.map((order: Order) => (
-            <div key={order.id} className="bg-white rounded shadow p-4">
-              <div className="font-bold mb-1">Order ID: {order.id} — Placed by: {order.user}</div>
-              <div className="mb-1">Order Date: {order.date}</div>
-              <div className="mb-1">
-                <span className="font-semibold">Shipping:</span> {order.shipping.address}, {order.shipping.city}, {order.shipping.postal}
-              </div>
-              <div className="mb-1">
-                <span className="font-semibold">Items:</span>
-                <ul className="ml-4">
-                  {order.cart.map(item => (
-                    <li key={item.id}>{item.name} x {item.quantity} (${item.price} each)</li>
-                  ))}
-                </ul>
-              </div>
+    <div className="max-w-4xl mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-6">All Orders</h2>
+      <div className="space-y-4">
+        {orders.map(order => (
+          <div key={order.id} className="border rounded p-4">
+            <div className="flex justify-between items-start">
               <div>
-                <span className="font-semibold">Total: </span>
-                ${order.cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
+                <h3 className="font-semibold">Order #{order.id}</h3>
+                <p className="text-gray-600">Customer: {order.user}</p>
+                <p className="text-gray-600">Date: {new Date(order.date).toLocaleDateString()}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-blue-700">${order.total}</p>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2">Items:</h4>
+              <ul className="space-y-2">
+                {order.cart.map(item => (
+                  <li key={item.id} className="flex justify-between">
+                    <span>{item.name} x {item.quantity}</span>
+                    <span>${(item.price * item.quantity).toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2">Shipping:</h4>
+              <p>{order.shipping.name}</p>
+              <p>{order.shipping.address}</p>
+              <p>{order.shipping.city}, {order.shipping.postal}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

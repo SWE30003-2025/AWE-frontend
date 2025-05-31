@@ -1,45 +1,56 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { getProducts, saveProducts, Product } from "../api";
+import { useState, useEffect, FormEvent } from 'react';
+import { getProducts, createProduct, updateProduct, deleteProduct, Product } from '../api';
 import toast from 'react-hot-toast';
 
-interface FormData {
+interface ProductForm {
   name: string;
   description: string;
   price: string;
-  image: string;
 }
 
 export default function Admin() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [form, setForm] = useState<FormData>({ name: "", description: "", price: "", image: "" });
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState<ProductForm>({
+    name: "",
+    description: "",
+    price: "",
+  });
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
-    setProducts(getProducts());
+    const loadProducts = async () => {
+      const productsData = await getProducts();
+      setProducts(productsData);
+    };
+    loadProducts();
   }, []);
 
-  useEffect(() => {
-    saveProducts(products);
-  }, [products]);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleAdd = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.price) return;
-    setProducts([
-      ...products,
-      { ...form, id: Date.now(), price: parseFloat(form.price) }
-    ]);
-    setForm({ name: "", description: "", price: "", image: "" });
-    toast.success("Product added!");
+
+    try {
+      const newProduct = await createProduct({
+        name: form.name,
+        description: form.description,
+        price: parseFloat(form.price),
+      });
+      setProducts([...products, newProduct]);
+      setForm({ name: "", description: "", price: "" });
+      toast.success("Product added!");
+    } catch (error) {
+      toast.error("Failed to add product");
+    }
   };
 
-  const handleDelete = (id: number) => {
-    setProducts(products.filter(p => p.id !== id));
-    toast.success("Product deleted!");
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteProduct(id);
+      setProducts(products.filter(p => p.id !== id));
+      toast.success("Product deleted!");
+    } catch (error) {
+      toast.error("Failed to delete product");
+    }
   };
 
   const handleEdit = (product: Product) => {
@@ -48,74 +59,89 @@ export default function Admin() {
       name: product.name,
       description: product.description,
       price: product.price.toString(),
-      image: product.image,
     });
   };
 
-  const handleUpdate = (e: FormEvent) => {
+  const handleUpdate = async (e: FormEvent) => {
     e.preventDefault();
-    setProducts(products.map(p => p.id === editingId ? { ...p, ...form, price: parseFloat(form.price) } : p));
-    setEditingId(null);
-    setForm({ name: "", description: "", price: "", image: "" });
-    toast.success("Product updated!");
-  };
+    if (!editingId) return;
 
-  const handleCancel = () => {
-    setEditingId(null);
-    setForm({ name: "", description: "", price: "", image: "" });
+    try {
+      const updatedProduct = await updateProduct(editingId, {
+        name: form.name,
+        description: form.description,
+        price: parseFloat(form.price),
+      });
+      setProducts(products.map(p => p.id === editingId ? updatedProduct : p));
+      setEditingId(null);
+      setForm({ name: "", description: "", price: "" });
+      toast.success("Product updated!");
+    } catch (error) {
+      toast.error("Failed to update product");
+    }
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 bg-white p-8 rounded shadow">
-      <h2 className="text-2xl font-bold mb-6 text-center">Admin Panel</h2>
-      <form onSubmit={editingId ? handleUpdate : handleAdd} className="mb-8 grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <input name="name" placeholder="Name" className="p-2 border rounded" value={form.name} onChange={handleChange} />
-        <input name="description" placeholder="Description" className="p-2 border rounded" value={form.description} onChange={handleChange} />
-        <input name="price" placeholder="Price" type="number" className="p-2 border rounded" value={form.price} onChange={handleChange} />
-        <input name="image" placeholder="Image URL" className="p-2 border rounded" value={form.image} onChange={handleChange} />
+    <div className="max-w-4xl mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-6">Admin Dashboard</h2>
+      
+      <form onSubmit={editingId ? handleUpdate : handleSubmit} className="mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            type="text"
+            placeholder="Product Name"
+            value={form.name}
+            onChange={e => setForm({ ...form, name: e.target.value })}
+            className="border p-2 rounded"
+            required
+          />
+          <input
+            type="number"
+            placeholder="Price"
+            value={form.price}
+            onChange={e => setForm({ ...form, price: e.target.value })}
+            className="border p-2 rounded"
+            step="0.01"
+            required
+          />
+        </div>
+        <textarea
+          placeholder="Description"
+          value={form.description}
+          onChange={e => setForm({ ...form, description: e.target.value })}
+          className="border p-2 rounded w-full mt-4"
+          rows={3}
+        />
         <button
           type="submit"
-          className="col-span-1 sm:col-span-4 bg-blue-700 text-white py-2 rounded hover:bg-blue-800"
+          className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700"
         >
           {editingId ? "Update Product" : "Add Product"}
         </button>
-        {editingId && (
-          <button
-            type="button"
-            className="col-span-1 sm:col-span-4 bg-gray-300 text-gray-800 py-2 rounded mt-2"
-            onClick={handleCancel}
-          >
-            Cancel
-          </button>
-        )}
       </form>
-      <div>
-        <h3 className="text-lg font-bold mb-2">Current Products:</h3>
-        {products.length === 0 ? (
-          <p className="text-gray-500">No products.</p>
-        ) : (
-          <ul>
-            {products.map((prod: Product) => (
-              <li key={prod.id} className="flex justify-between items-center border-b py-2">
-                <span>{prod.name} - ${prod.price}</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(prod)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-700"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(prod.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {products.map(prod => (
+          <div key={prod.id} className="border rounded p-4">
+            <h3 className="font-semibold">{prod.name}</h3>
+            <p className="text-gray-600">{prod.description}</p>
+            <p className="font-bold text-blue-700">${prod.price}</p>
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => handleEdit(prod)}
+                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(prod.id)}
+                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
