@@ -1,12 +1,43 @@
-import axios from 'axios';
+import axios from "axios";
 
-// Create axios instance with base URL
 const api = axios.create({
   baseURL: "http://localhost:8000",
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+// Add request interceptor to include credentials
+api.interceptors.request.use(
+  (config) => {
+    const username = localStorage.getItem("username");
+    const password = localStorage.getItem("password");
+
+    if (username && password) {
+      const credentials = btoa(`${username}:${password}`);
+      config.headers.Authorization = `Basic ${credentials}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      //localStorage.removeItem("username");
+      //localStorage.removeItem("password");
+
+      console.log("Unauthorized");
+    }
+    return Promise.reject(error);
+  }
+);
 
 // ================================
 // Types and Interfaces
@@ -116,12 +147,16 @@ export async function createOrder(order: Omit<Order, "id" | "date">): Promise<Or
 // User APIs
 // ================================
 
-export async function login(email: string, password: string): Promise<{ user: User; token: string }> {
+export async function login(email: string, password: string): Promise<{ user: User }> {
   try {
     const response = await api.post('/api/auth/login/', { email, password });
-    const { user, token } = response.data;
-    localStorage.setItem('token', token);
-    return { user, token };
+    const { user } = response.data;
+    
+    // Store credentials for future requests
+    localStorage.setItem("username", email);
+    localStorage.setItem("password", password);
+    
+    return { user };
   } catch (error) {
     console.error("Error logging in:", error);
     throw error;
@@ -148,7 +183,20 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
-export function logout(): void {
-  localStorage.removeItem('token');
+// admin only
+export async function listUsers(): Promise<Array<User>> {
+  try {
+    const response = await api.get("/api/user");
+    console.log(response.data);
+    
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return [];
+  }
 }
 
+export function logout(): void {
+  localStorage.removeItem("username");
+  localStorage.removeItem("password");
+}
