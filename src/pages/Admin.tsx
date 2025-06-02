@@ -6,6 +6,7 @@ interface ProductForm {
   name: string;
   description: string;
   price: string;
+  stock: string;
 }
 
 export default function Admin() {
@@ -14,6 +15,7 @@ export default function Admin() {
     name: "",
     description: "",
     price: "",
+    stock: "",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -27,16 +29,17 @@ export default function Admin() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.price) return;
+    if (!form.name || !form.price || !form.stock) return;
 
     try {
       const newProduct = await createProduct({
         name: form.name,
         description: form.description,
         price: parseFloat(form.price),
+        stock: parseInt(form.stock, 10),
       });
       setProducts([...products, newProduct]);
-      setForm({ name: "", description: "", price: "" });
+      setForm({ name: "", description: "", price: "", stock: "" });
       toast.success("Product added!");
     } catch (error) {
       toast.error("Failed to add product");
@@ -59,6 +62,7 @@ export default function Admin() {
       name: product.name,
       description: product.description,
       price: product.price.toString(),
+      stock: product.stock?.toString() ?? "",
     });
   };
 
@@ -71,10 +75,11 @@ export default function Admin() {
         name: form.name,
         description: form.description,
         price: parseFloat(form.price),
+        stock: parseInt(form.stock, 10),
       });
       setProducts(products.map(p => p.id === editingId ? updatedProduct : p));
       setEditingId(null);
-      setForm({ name: "", description: "", price: "" });
+      setForm({ name: "", description: "", price: "", stock: "" });
       toast.success("Product updated!");
     } catch (error) {
       toast.error("Failed to update product");
@@ -104,6 +109,15 @@ export default function Admin() {
             step="0.01"
             required
           />
+          <input
+            type="number"
+            placeholder="Stock"
+            value={form.stock}
+            onChange={e => setForm({ ...form, stock: e.target.value })}
+            className="border p-2 rounded"
+            min={0}
+            required
+          />
         </div>
         <textarea
           placeholder="Description"
@@ -126,6 +140,7 @@ export default function Admin() {
             <h3 className="font-semibold">{prod.name}</h3>
             <p className="text-gray-600">{prod.description}</p>
             <p className="font-bold text-blue-700">${prod.price}</p>
+            <p className="text-gray-800">Stock: {prod.stock}</p>
             <div className="mt-4 flex gap-2">
               <button
                 onClick={() => handleEdit(prod)}

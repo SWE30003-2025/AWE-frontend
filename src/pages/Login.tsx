@@ -4,24 +4,27 @@ import { login } from "../api";
 import toast from 'react-hot-toast';
 
 interface LoginForm {
-  email: string;
+  username: string;
   password: string;
 }
 
 export default function Login() {
-  const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
+  const [form, setForm] = useState<LoginForm>({ username: "", password: "" });
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const { user } = await login(form.email, form.password);
+      const { user } = await login(form.username, form.password);
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("loggedInUser", user.name);
+      localStorage.setItem("loggedInUser", user.username);
+      localStorage.setItem("userRole", user.role ?? "customer");
+      localStorage.setItem("userId", user.id); 
+
       toast.success("Logged in successfully!");
       navigate("/");
-    } catch (error) {
-      toast.error("Invalid email or password");
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Invalid username or password");
     }
   };
 
@@ -30,11 +33,11 @@ export default function Login() {
       <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-gray-700 mb-2">Email</label>
+          <label className="block text-gray-700 mb-2">Username</label>
           <input
-            type="email"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
+            type="text"
+            value={form.username}
+            onChange={e => setForm({ ...form, username: e.target.value })}
             className="w-full p-2 border rounded"
             required
           />

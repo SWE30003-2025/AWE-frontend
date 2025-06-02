@@ -7,32 +7,37 @@ const api = axios.create({
   },
 });
 
-// Add request interceptor to include credentials
+// Add request interceptor to include credentials (except for signup/login)
 api.interceptors.request.use(
   (config) => {
-    const username = localStorage.getItem("username");
-    const password = localStorage.getItem("password");
-
-    if (username && password) {
-      const credentials = btoa(`${username}:${password}`);
-      config.headers.Authorization = `Basic ${credentials}`;
+    if (
+      config.url &&
+      (config.url.endsWith("/signup") || config.url.endsWith("/login"))
+    ) {
+      return config;
     }
 
+    const username = localStorage.getItem("username");
+    const password = localStorage.getItem("password");
+    if (username && password) {
+      const credentials = btoa(`${username}:${password}`);
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Basic ${credentials}`;
+    }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
+
 
 // Add response interceptor to handle auth errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      //localStorage.removeItem("username");
-      //localStorage.removeItem("password");
-
+      // Optionally clear credentials
+      // localStorage.removeItem("username");
+      // localStorage.removeItem("password");
       console.log("Unauthorized");
     }
     return Promise.reject(error);
@@ -48,6 +53,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  stock: number;
   created_at: string;
   updated_at: string;
 }
@@ -71,9 +77,13 @@ export interface Order {
 }
 
 export interface User {
-  name: string;
+  id: string;
+  username: string;
   email: string;
   password?: string;
+  firstName: string;
+  lastName: string;
+  role?: string;
 }
 
 // ================================
@@ -109,6 +119,7 @@ export async function updateProduct(id: string, product: Partial<Product>): Prom
     throw error;
   }
 }
+
 
 export async function deleteProduct(id: string): Promise<void> {
   try {
@@ -147,14 +158,16 @@ export async function createOrder(order: Omit<Order, "id" | "date">): Promise<Or
 // User APIs
 // ================================
 
-export async function login(email: string, password: string): Promise<{ user: User }> {
+export async function login(username: string, password: string): Promise<{ user: User }> {
   try {
-    const response = await api.post('/api/auth/login/', { email, password });
+    const response = await api.post('/api/user/login', { username, password });
     const { user } = response.data;
-    
+
     // Store credentials for future requests
-    localStorage.setItem("username", email);
+    localStorage.setItem("username", username);
     localStorage.setItem("password", password);
+    localStorage.setItem("userRole", user.role ?? "customer");
+
     
     return { user };
   } catch (error) {
@@ -173,22 +186,37 @@ export async function register(user: Omit<User, 'id'>): Promise<User> {
   }
 }
 
-export async function getCurrentUser(): Promise<User | null> {
+
+export async function updateUser(id: string, data: Partial<User> & { password?: string }): Promise<User> {
   try {
-    const response = await api.get('/api/auth/user/');
+    const response = await api.put(`/api/user/${id}`, data);
     return response.data;
   } catch (error) {
-      console.error("Error fetching current user:", error);
+    console.error("Error updating user:", error);
+    throw error;
+  }
+}
+
+
+
+export async function getCurrentUser(): Promise<User | null> {
+  try {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return null;
+    const response = await api.get(`/api/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching current user:", error);
     return null;
   }
 }
+
 
 // admin only
 export async function listUsers(): Promise<Array<User>> {
   try {
     const response = await api.get("/api/user");
     console.log(response.data);
-    
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);

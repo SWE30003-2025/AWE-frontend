@@ -1,46 +1,88 @@
 import { useState, useEffect, FormEvent } from "react";
-import { getCurrentUser, User } from "../api";
-import toast from 'react-hot-toast';
+import { getCurrentUser, updateUser, User } from "../api";
+import toast from "react-hot-toast";
 
 interface ProfileForm {
-  name: string;
+  id: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  newPassword?: string;
 }
 
 export default function Profile() {
   const [form, setForm] = useState<ProfileForm>({
-    name: "",
+    id: "",
+    firstName: "",
+    lastName: "",
     email: "",
+    newPassword: "",
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadUser = async () => {
       const user = await getCurrentUser();
       if (user) {
         setForm({
-          name: user.name,
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
           email: user.email,
+          newPassword: "",
         });
       }
+      setLoading(false);
     };
     loadUser();
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    toast.error("Profile updates are not supported in this version");
+    if (!form.id) {
+      toast.error("User not loaded yet.");
+      return;
+    }
+    try {
+      const updatePayload: any = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+      };
+      if (form.newPassword && form.newPassword.length > 0) {
+        updatePayload.password = form.newPassword;
+      }
+      await updateUser(form.id, updatePayload);
+      toast.success("Profile updated!");
+      setForm(f => ({ ...f, newPassword: "" }));
+    } catch {
+      toast.error("Failed to update profile");
+    }
   };
+
+  if (loading) {
+    return <div className="text-center mt-10">Loading...</div>;
+  }
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-center">Profile</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-gray-700 mb-2">Name</label>
+          <label className="block text-gray-700 mb-2">First Name</label>
           <input
             type="text"
-            value={form.name}
-            onChange={e => setForm({ ...form, name: e.target.value })}
+            value={form.firstName}
+            onChange={e => setForm({ ...form, firstName: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-2">Last Name</label>
+          <input
+            type="text"
+            value={form.lastName}
+            onChange={e => setForm({ ...form, lastName: e.target.value })}
             className="w-full p-2 border rounded"
             required
           />
@@ -50,10 +92,19 @@ export default function Profile() {
           <input
             type="email"
             value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
+            disabled // don't allow change here
             className="w-full p-2 border rounded"
             required
-            disabled
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-2">New Password</label>
+          <input
+            type="password"
+            value={form.newPassword}
+            onChange={e => setForm({ ...form, newPassword: e.target.value })}
+            className="w-full p-2 border rounded"
+            placeholder="Leave blank to keep current"
           />
         </div>
         <button
