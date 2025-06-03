@@ -2,52 +2,48 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "http://localhost:8000",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
-// Add request interceptor to include credentials
+// Request interceptor: add basic auth if user is logged in (skip for login/signup)
 api.interceptors.request.use(
   (config) => {
+    if (
+      config.url &&
+      (config.url.endsWith("/signup") || config.url.endsWith("/login"))
+    ) {
+      return config;
+    }
     const username = localStorage.getItem("username");
     const password = localStorage.getItem("password");
-
     if (username && password) {
       const credentials = btoa(`${username}:${password}`);
+      config.headers = config.headers || {};
       config.headers.Authorization = `Basic ${credentials}`;
     }
-
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Add response interceptor to handle auth errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      //localStorage.removeItem("username");
-      //localStorage.removeItem("password");
-
       console.log("Unauthorized");
     }
     return Promise.reject(error);
   }
 );
 
-// ================================
-// Types and Interfaces
-// ================================
+// ===== Types =====
 
 export interface Product {
   id: string;
   name: string;
   description: string;
   price: number;
+  stock: number;
   created_at: string;
   updated_at: string;
 }
@@ -56,29 +52,34 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
+export interface OrderItem {
+  product_id: string; // PK
+  product_name: string;
+  quantity: number;
+  price_at_purchase: number;
+}
+
 export interface Order {
   id: number;
   user: string;
-  cart: CartItem[];
-  shipping: {
-    name: string;
-    address: string;
-    city: string;
-    postal: string;
-  };
+  created_at: string;
+  status?: string;
   total: number;
-  date: string;
+  items: OrderItem[];
 }
+
 
 export interface User {
-  name: string;
+  id: string;
+  username: string;
   email: string;
   password?: string;
+  firstName: string;
+  lastName: string;
+  role?: string;
 }
 
-// ================================
-// Product APIs
-// ================================
+// ===== Product APIs =====
 
 export async function getProducts(): Promise<Product[]> {
   try {
@@ -119,9 +120,7 @@ export async function deleteProduct(id: string): Promise<void> {
   }
 }
 
-// ================================
-// Order APIs
-// ================================
+// ===== Order APIs =====
 
 export async function getOrders(): Promise<Order[]> {
   try {
@@ -133,29 +132,31 @@ export async function getOrders(): Promise<Order[]> {
   }
 }
 
-export async function createOrder(order: Omit<Order, "id" | "date">): Promise<Order> {
+// Analytics (admin only)
+export async function getSalesAnalytics(): Promise<{
+  total_sales: number;
+  total_orders: number;
+  popular_products: Array<{ product__name: string; total_sold: number }>;
+}> {
   try {
-    const response = await api.post("/api/order", order);
+    const response = await api.get("/api/order/analytics/");
     return response.data;
   } catch (error) {
-    console.error("Error creating order:", error);
+    console.error("Error fetching analytics:", error);
     throw error;
   }
 }
 
-// ================================
-// User APIs
-// ================================
+// ===== User APIs =====
 
-export async function login(email: string, password: string): Promise<{ user: User }> {
+export async function login(username: string, password: string): Promise<{ user: User }> {
   try {
-    const response = await api.post('/api/auth/login/', { email, password });
+    const response = await api.post('/api/user/login', { username, password });
     const { user } = response.data;
-    
-    // Store credentials for future requests
-    localStorage.setItem("username", email);
+    localStorage.setItem("username", username);
     localStorage.setItem("password", password);
-    
+    localStorage.setItem("userRole", user.role ?? "customer");
+    localStorage.setItem("userId", user.id);
     return { user };
   } catch (error) {
     console.error("Error logging in:", error);
@@ -173,22 +174,32 @@ export async function register(user: Omit<User, 'id'>): Promise<User> {
   }
 }
 
-export async function getCurrentUser(): Promise<User | null> {
+export async function updateUser(id: string, data: Partial<User> & { password?: string }): Promise<User> {
   try {
-    const response = await api.get('/api/auth/user/');
+    const response = await api.put(`/api/user/${id}`, data);
     return response.data;
   } catch (error) {
-      console.error("Error fetching current user:", error);
+    console.error("Error updating user:", error);
+    throw error;
+  }
+}
+
+export async function getCurrentUser(): Promise<User | null> {
+  try {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return null;
+    const response = await api.get(`/api/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching current user:", error);
     return null;
   }
 }
 
-// admin only
+// Admin only
 export async function listUsers(): Promise<Array<User>> {
   try {
     const response = await api.get("/api/user");
-    console.log(response.data);
-    
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -199,4 +210,6 @@ export async function listUsers(): Promise<Array<User>> {
 export function logout(): void {
   localStorage.removeItem("username");
   localStorage.removeItem("password");
+  localStorage.removeItem("userRole");
+  localStorage.removeItem("userId");
 }

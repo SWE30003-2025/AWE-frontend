@@ -22,7 +22,8 @@ export default function AdminOrders() {
               <div>
                 <h3 className="font-semibold">Order #{order.id}</h3>
                 <p className="text-gray-600">Customer: {order.user}</p>
-                <p className="text-gray-600">Date: {new Date(order.date).toLocaleDateString()}</p>
+                <p className="text-gray-600">Date: {new Date(order.created_at).toLocaleDateString()}</p>
+                <p className="text-gray-600">Status: {order.status}</p>
               </div>
               <div className="text-right">
                 <p className="font-bold text-blue-700">${order.total}</p>
@@ -31,19 +32,13 @@ export default function AdminOrders() {
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Items:</h4>
               <ul className="space-y-2">
-                {order.cart.map(item => (
-                  <li key={item.id} className="flex justify-between">
-                    <span>{item.name} x {item.quantity}</span>
-                    <span>${(item.price * item.quantity).toFixed(2)}</span>
+                {order.items.map((item, idx) => (
+                  <li key={idx} className="flex justify-between">
+                    <span>{item.product_name} x {item.quantity}</span>
+                    <span>${(item.price_at_purchase * item.quantity).toFixed(2)}</span>
                   </li>
                 ))}
               </ul>
-            </div>
-            <div className="mt-4">
-              <h4 className="font-semibold mb-2">Shipping:</h4>
-              <p>{order.shipping.name}</p>
-              <p>{order.shipping.address}</p>
-              <p>{order.shipping.city}, {order.shipping.postal}</p>
             </div>
           </div>
         ))}

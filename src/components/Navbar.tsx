@@ -1,11 +1,11 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import { useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
   const { cart } = useCart();
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const loggedInUser = localStorage.getItem("loggedInUser");
+  const userRole = localStorage.getItem("userRole");
   const navigate = useNavigate();
 
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -24,6 +24,32 @@ export default function Navbar() {
             <Link to="/catalog" className="text-white hover:text-gray-900">
               Products
             </Link>
+            {/* Admin Dashboard link for admin */}
+            {isLoggedIn && userRole === "admin" && (
+              <>
+                <Link to="/admin" className="text-white hover:text-gray-900">
+                  Admin Dashboard
+                </Link>
+                <Link to="/admin-orders" className="text-white hover:text-gray-900">
+                  All Orders
+                </Link>
+                <Link to="/admin-analytics" className="text-white hover:text-gray-900">
+                  Sales Analytics
+                </Link>
+              </>
+            )}
+            {/* Orders link: users see My Orders */}
+            {isLoggedIn && userRole !== "admin" && (
+              <Link to="/my-orders" className="text-white hover:text-gray-900">
+                My Orders
+              </Link>
+            )}
+            {/* Profile link for logged in users */}
+            {isLoggedIn && (
+              <Link to="/profile" className="text-white hover:text-gray-900">
+                Profile
+              </Link>
+            )}
           </div>
 
           <div className="flex items-center space-x-4">
@@ -37,6 +63,8 @@ export default function Navbar() {
                   onClick={() => {
                     localStorage.removeItem("isLoggedIn");
                     localStorage.removeItem("loggedInUser");
+                    localStorage.removeItem("userRole");
+                    localStorage.removeItem("userId");
                     navigate("/login");
                   }}
                   className="text-white hover:text-gray-900"
@@ -45,9 +73,14 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <Link to="/login" className="text-white hover:text-gray-900">
-                Login
-              </Link>
+              <>
+                <Link to="/login" className="text-white hover:text-gray-900">
+                  Login
+                </Link>
+                <Link to="/register" className="text-white hover:text-gray-900">
+                  Register
+                </Link>
+              </>
             )}
           </div>
         </div>

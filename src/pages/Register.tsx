@@ -1,17 +1,16 @@
 import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { register, User } from "../api";
+import { register } from "../api";
 import toast from 'react-hot-toast';
 
-interface RegisterForm extends Omit<User, 'id'> {
-  password: string;
-}
-
 export default function Register() {
-  const [form, setForm] = useState<RegisterForm>({
-    name: "",
+  const [form, setForm] = useState({
+    username: "",
     email: "",
     password: "",
+    firstName: "",
+    lastName: "",
+
   });
   const navigate = useNavigate();
 
@@ -21,8 +20,8 @@ export default function Register() {
       await register(form);
       toast.success("Registration successful! Please login.");
       navigate("/login");
-    } catch (error) {
-      toast.error("Registration failed. Please try again.");
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Registration failed. Please try again.");
     }
   };
 
@@ -31,11 +30,31 @@ export default function Register() {
       <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-gray-700 mb-2">Name</label>
+          <label className="block text-gray-700 mb-2">Username</label>
           <input
             type="text"
-            value={form.name}
-            onChange={e => setForm({ ...form, name: e.target.value })}
+            value={form.username}
+            onChange={e => setForm({ ...form, username: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-2">First Name</label>
+          <input
+            type="text"
+            value={form.firstName}
+            onChange={e => setForm({ ...form, firstName: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-2">Last Name</label>
+          <input
+            type="text"
+            value={form.lastName}
+            onChange={e => setForm({ ...form, lastName: e.target.value })}
             className="w-full p-2 border rounded"
             required
           />

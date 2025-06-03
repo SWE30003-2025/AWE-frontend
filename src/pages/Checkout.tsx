@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 export default function Checkout() {
   const { cart, clearCart } = useCart();
@@ -18,11 +20,32 @@ export default function Checkout() {
     }
   }, [cart, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement order submission
-    clearCart();
-    navigate('/');
+
+    try {
+      const orderPayload = {
+        shipping: {
+          name: form.name,
+          address: form.address,
+          city: form.city,
+          postal: form.postal,
+        },
+        items: cart.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity,
+        }))
+      };
+
+      await axios.post('http://localhost:8000/api/order/', orderPayload);
+
+      toast.success('Order placed successfully!');
+      clearCart();
+      navigate('/order-confirmation');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to place order. Please try again.');
+    }
   };
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
