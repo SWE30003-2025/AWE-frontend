@@ -38,6 +38,15 @@ api.interceptors.response.use(
 
 // ===== Types =====
 
+export interface Category {
+  id: string;
+  name: string;
+  description: string;
+  parentCategory: string | null;
+  parent_name?: string;
+  children: Category[];
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -81,9 +90,24 @@ export interface User {
 
 // ===== Product APIs =====
 
-export async function getProducts(): Promise<Product[]> {
+export async function getCategories(): Promise<Category[]> {
   try {
-    const response = await api.get("/api/product");
+    const response = await api.get("/api/category");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+}
+
+export async function getProducts(categories?: string[]): Promise<Product[]> {
+  try {
+    let url = "/api/product";
+    if (categories && categories.length > 0) {
+      const categoryParams = categories.join(',');
+      url += `?categories=${encodeURIComponent(categoryParams)}`;
+    }
+    const response = await api.get(url);
     return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);
