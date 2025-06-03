@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { getProducts, createProduct, updateProduct, deleteProduct, Product } from '../api';
+import { getProducts, createProduct, updateProduct, deleteProduct, Product, getSalesAnalytics } from '../api';
 import toast from 'react-hot-toast';
 
 interface ProductForm {
@@ -18,19 +18,16 @@ export default function Admin() {
     stock: "",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [analytics, setAnalytics] = useState<any>(null);
 
   useEffect(() => {
-    const loadProducts = async () => {
-      const productsData = await getProducts();
-      setProducts(productsData);
-    };
-    loadProducts();
+    getProducts().then(setProducts);
+    getSalesAnalytics().then(setAnalytics).catch(() => setAnalytics(null));
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.price || !form.stock) return;
-
     try {
       const newProduct = await createProduct({
         name: form.name,
@@ -41,7 +38,7 @@ export default function Admin() {
       setProducts([...products, newProduct]);
       setForm({ name: "", description: "", price: "", stock: "" });
       toast.success("Product added!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to add product");
     }
   };
@@ -51,7 +48,7 @@ export default function Admin() {
       await deleteProduct(id);
       setProducts(products.filter(p => p.id !== id));
       toast.success("Product deleted!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete product");
     }
   };
@@ -69,7 +66,6 @@ export default function Admin() {
   const handleUpdate = async (e: FormEvent) => {
     e.preventDefault();
     if (!editingId) return;
-
     try {
       const updatedProduct = await updateProduct(editingId, {
         name: form.name,
@@ -81,7 +77,7 @@ export default function Admin() {
       setEditingId(null);
       setForm({ name: "", description: "", price: "", stock: "" });
       toast.success("Product updated!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to update product");
     }
   };
@@ -90,6 +86,22 @@ export default function Admin() {
     <div className="max-w-4xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-6">Admin Dashboard</h2>
       
+      {analytics && (
+        <div className="bg-gray-100 p-4 rounded mb-8 shadow">
+          <h3 className="font-semibold mb-2">Sales Analytics</h3>
+          <div>Total Sales: <span className="font-bold">${analytics.total_sales?.toFixed(2)}</span></div>
+          <div>Total Orders: <span className="font-bold">{analytics.total_orders}</span></div>
+          <div className="mt-2">
+            <span className="font-semibold">Popular Products:</span>
+            <ul className="list-disc ml-6">
+              {analytics.popular_products.map((p: any, idx: number) => (
+                <li key={idx}>{p.product__name} - Sold: {p.total_sold}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={editingId ? handleUpdate : handleSubmit} className="mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input

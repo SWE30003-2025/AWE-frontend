@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import { useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
   const { cart } = useCart();
@@ -25,10 +24,30 @@ export default function Navbar() {
             <Link to="/catalog" className="text-white hover:text-gray-900">
               Products
             </Link>
-            {/* Show the admin dashboard button only for admin */}
+            {/* Admin Dashboard link for admin */}
             {isLoggedIn && userRole === "admin" && (
-              <Link to="/admin" className="text-white hover:text-gray-900">
-                Admin Dashboard
+              <>
+                <Link to="/admin" className="text-white hover:text-gray-900">
+                  Admin Dashboard
+                </Link>
+                <Link to="/admin-orders" className="text-white hover:text-gray-900">
+                  All Orders
+                </Link>
+                <Link to="/admin-analytics" className="text-white hover:text-gray-900">
+                  Sales Analytics
+                </Link>
+              </>
+            )}
+            {/* Orders link: users see My Orders */}
+            {isLoggedIn && userRole !== "admin" && (
+              <Link to="/my-orders" className="text-white hover:text-gray-900">
+                My Orders
+              </Link>
+            )}
+            {/* Profile link for logged in users */}
+            {isLoggedIn && (
+              <Link to="/profile" className="text-white hover:text-gray-900">
+                Profile
               </Link>
             )}
           </div>
@@ -39,16 +58,13 @@ export default function Navbar() {
             </Link>
             {isLoggedIn ? (
               <>
-                {/* Profile Link */}
-                <Link to="/profile" className="text-white hover:text-gray-900">
-                  Profile
-                </Link>
                 <span className="text-white">Welcome, {loggedInUser}</span>
                 <button
                   onClick={() => {
                     localStorage.removeItem("isLoggedIn");
                     localStorage.removeItem("loggedInUser");
                     localStorage.removeItem("userRole");
+                    localStorage.removeItem("userId");
                     navigate("/login");
                   }}
                   className="text-white hover:text-gray-900"
