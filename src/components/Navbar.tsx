@@ -44,10 +44,19 @@ export default function Navbar() {
                 <Link to="/admin-analytics" className="text-white hover:text-gray-900">
                   Sales Analytics
                 </Link>
+                <Link to="/shipment-dashboard" className="text-white hover:text-gray-900">
+                  Shipment Dashboard
+                </Link>
               </>
             )}
+            {/* Shipment Dashboard link for shipment managers */}
+            {isLoggedIn && userRole === "shipment_manager" && (
+              <Link to="/shipment-dashboard" className="text-white hover:text-gray-900">
+                Shipment Dashboard
+              </Link>
+            )}
             {/* Orders link: users see My Orders */}
-            {isLoggedIn && userRole !== "admin" && (
+            {isLoggedIn && userRole !== "admin" && userRole !== "shipment_manager" && (
               <Link to="/my-orders" className="text-white hover:text-gray-900">
                 My Orders
               </Link>

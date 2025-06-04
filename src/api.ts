@@ -3,6 +3,7 @@ import type { CategoryModel } from './models/CategoryModel';
 import type { ProductModel, CreateProductModel, UpdateProductModel } from './models/ProductModel';
 import type { OrderModel } from './models/OrderModel';
 import type { UserModel, CreateUserModel, UpdateUserModel } from './models/UserModel';
+import type { ShipmentDashboardData } from './models/ShipmentModel';
 
 const api = axios.create({
   baseURL: "http://localhost:8000",
@@ -198,4 +199,16 @@ export function logout(): void {
   localStorage.removeItem("password");
   localStorage.removeItem("userRole");
   localStorage.removeItem("userId");
+}
+
+// ===== Shipment APIs =====
+
+export async function getShipmentDashboard(): Promise<ShipmentDashboardData> {
+  try {
+    const response = await api.get("/api/shipment/dashboard/");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching shipment dashboard:", error);
+    throw error;
+  }
 }
