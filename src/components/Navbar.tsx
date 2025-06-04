@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { logout } from '../api';
 
 export default function Navbar() {
   const { cart } = useCart();
@@ -9,6 +10,13 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleLogout = () => {
+    logout(); // This clears username, password, userRole, and userId
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("loggedInUser");
+    navigate("/login");
+  };
 
   return (
     <nav className="bg-blue-800 shadow-md">
@@ -60,13 +68,7 @@ export default function Navbar() {
               <>
                 <span className="text-white">Welcome, {loggedInUser}</span>
                 <button
-                  onClick={() => {
-                    localStorage.removeItem("isLoggedIn");
-                    localStorage.removeItem("loggedInUser");
-                    localStorage.removeItem("userRole");
-                    localStorage.removeItem("userId");
-                    navigate("/login");
-                  }}
+                  onClick={handleLogout}
                   className="text-white hover:text-gray-900"
                 >
                   Logout

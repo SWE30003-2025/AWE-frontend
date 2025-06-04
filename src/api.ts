@@ -133,7 +133,7 @@ export async function getSalesAnalytics(): Promise<{
 
 export async function login(username: string, password: string): Promise<{ user: import('./models/UserModel').UserModel }> {
   try {
-    const response = await api.post('/api/user/login', { username, password });
+    const response = await api.post('/api/user/login/', { username, password });
     const { user } = response.data;
     localStorage.setItem("username", username);
     localStorage.setItem("password", password);
