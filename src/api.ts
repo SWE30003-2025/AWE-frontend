@@ -4,6 +4,8 @@ import type { ProductModel, CreateProductModel, UpdateProductModel } from './mod
 import type { OrderModel } from './models/OrderModel';
 import type { UserModel, CreateUserModel, UpdateUserModel } from './models/UserModel';
 import type { ShipmentDashboardData } from './models/ShipmentModel';
+import type { ShoppingCartModel } from './models/ShoppingCartModel';
+import type { CartItemModel, CreateCartItemModel, UpdateCartItemModel } from './models/CartItemModel';
 
 const api = axios.create({
   baseURL: "http://localhost:8000",
@@ -199,6 +201,55 @@ export function logout(): void {
   localStorage.removeItem("password");
   localStorage.removeItem("userRole");
   localStorage.removeItem("userId");
+}
+
+// ===== Cart APIs =====
+
+export async function getCart(): Promise<ShoppingCartModel | null> {
+  try {
+    const response = await api.get("/api/shopping-cart/");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    return null;
+  }
+}
+
+export async function addToCart(product_id: string, quantity: number = 1): Promise<CartItemModel | null> {
+  try {
+    const response = await api.post("/api/shopping-cart/", {
+      product_id,
+      quantity
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    throw error;
+  }
+}
+
+export async function updateCartItem(product_id: string, quantity: number): Promise<CartItemModel | null> {
+  try {
+    const response = await api.put("/api/shopping-cart/", {
+      product_id,
+      quantity
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating cart item:", error);
+    throw error;
+  }
+}
+
+export async function removeFromCart(product_id: string): Promise<void> {
+  try {
+    await api.delete("/api/shopping-cart/", {
+      data: { product_id }
+    });
+  } catch (error) {
+    console.error("Error removing from cart:", error);
+    throw error;
+  }
 }
 
 // ===== Shipment APIs =====

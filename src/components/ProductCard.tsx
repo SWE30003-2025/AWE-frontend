@@ -24,6 +24,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       <h3 className="font-semibold text-lg">{product.name}</h3>
       <p className="text-gray-600 mt-1">{product.description}</p>
+      <p className="text-sm text-gray-500 mt-1">Stock: {product.stock}</p>
       <div className="mt-auto">
         <span className="block font-bold text-blue-700">${product.price}</span>
         <button
@@ -32,6 +33,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         >
           Shop Now
         </button>
+        {product.stock === 0 && (
+          <p className="text-red-500 text-sm mt-1">Out of Stock</p>
+        )}
       </div>
     </div>
   );
