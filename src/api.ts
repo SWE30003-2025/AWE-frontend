@@ -1,4 +1,8 @@
 import axios from "axios";
+import type { CategoryModel } from './models/CategoryModel';
+import type { ProductModel, CreateProductModel, UpdateProductModel } from './models/ProductModel';
+import type { OrderModel } from './models/OrderModel';
+import type { UserModel, CreateUserModel, UpdateUserModel } from './models/UserModel';
 
 const api = axios.create({
   baseURL: "http://localhost:8000",
@@ -38,7 +42,7 @@ api.interceptors.response.use(
 
 // ===== Product APIs =====
 
-export async function getCategories(): Promise<import('./models/CategoryModel').CategoryModel[]> {
+export async function getCategories(): Promise<CategoryModel[]> {
   try {
     const response = await api.get("/api/category");
     return response.data;
@@ -48,7 +52,7 @@ export async function getCategories(): Promise<import('./models/CategoryModel').
   }
 }
 
-export async function getProducts(categories?: string[]): Promise<import('./models/ProductModel').ProductModel[]> {
+export async function getProducts(categories?: string[]): Promise<ProductModel[]> {
   try {
     let url = "/api/product";
     if (categories && categories.length > 0) {
@@ -63,7 +67,7 @@ export async function getProducts(categories?: string[]): Promise<import('./mode
   }
 }
 
-export async function getProduct(id: string): Promise<import('./models/ProductModel').ProductModel> {
+export async function getProduct(id: string): Promise<ProductModel> {
   try {
     const response = await api.get(`/api/product/${id}/`);
     return response.data;
@@ -73,7 +77,7 @@ export async function getProduct(id: string): Promise<import('./models/ProductMo
   }
 }
 
-export async function createProduct(product: Omit<import('./models/ProductModel').ProductModel, "id" | "created_at" | "updated_at">): Promise<import('./models/ProductModel').ProductModel> {
+export async function createProduct(product: CreateProductModel): Promise<ProductModel> {
   try {
     const response = await api.post("/api/product", product);
     return response.data;
@@ -83,7 +87,7 @@ export async function createProduct(product: Omit<import('./models/ProductModel'
   }
 }
 
-export async function updateProduct(id: string, product: Partial<import('./models/ProductModel').ProductModel>): Promise<import('./models/ProductModel').ProductModel> {
+export async function updateProduct(id: string, product: UpdateProductModel): Promise<ProductModel> {
   try {
     const response = await api.put(`/api/product/${id}`, product);
     return response.data;
@@ -104,7 +108,7 @@ export async function deleteProduct(id: string): Promise<void> {
 
 // ===== Order APIs =====
 
-export async function getOrders(): Promise<import('./models/OrderModel').OrderModel[]> {
+export async function getOrders(): Promise<OrderModel[]> {
   try {
     const response = await api.get("/api/order");
     return response.data;
@@ -131,7 +135,7 @@ export async function getSalesAnalytics(): Promise<{
 
 // ===== User APIs =====
 
-export async function login(username: string, password: string): Promise<{ user: import('./models/UserModel').UserModel }> {
+export async function login(username: string, password: string): Promise<{ user: UserModel }> {
   try {
     const response = await api.post('/api/user/login/', { username, password });
     const { user } = response.data;
@@ -146,7 +150,7 @@ export async function login(username: string, password: string): Promise<{ user:
   }
 }
 
-export async function register(user: Omit<import('./models/UserModel').UserModel, 'id'>): Promise<import('./models/UserModel').UserModel> {
+export async function register(user: CreateUserModel): Promise<UserModel> {
   try {
     const response = await api.post('/api/user/signup', user);
     return response.data;
@@ -156,7 +160,7 @@ export async function register(user: Omit<import('./models/UserModel').UserModel
   }
 }
 
-export async function updateUser(id: string, data: Partial<import('./models/UserModel').UserModel> & { password?: string }): Promise<import('./models/UserModel').UserModel> {
+export async function updateUser(id: string, data: UpdateUserModel): Promise<UserModel> {
   try {
     const response = await api.put(`/api/user/${id}/`, data);
     return response.data;
@@ -166,7 +170,7 @@ export async function updateUser(id: string, data: Partial<import('./models/User
   }
 }
 
-export async function getCurrentUser(): Promise<import('./models/UserModel').UserModel | null> {
+export async function getCurrentUser(): Promise<UserModel | null> {
   try {
     const userId = localStorage.getItem("userId");
     if (!userId) return null;
@@ -179,7 +183,7 @@ export async function getCurrentUser(): Promise<import('./models/UserModel').Use
 }
 
 // Admin only
-export async function listUsers(): Promise<Array<import('./models/UserModel').UserModel>> {
+export async function listUsers(): Promise<Array<UserModel>> {
   try {
     const response = await api.get("/api/user");
     return response.data;

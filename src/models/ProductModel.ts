@@ -6,3 +6,7 @@ export interface ProductModel {
   stock: number;
   category: string;
 }
+
+// Partial interfaces for API operations
+export type CreateProductModel = Omit<ProductModel, "id">;
+export type UpdateProductModel = Partial<ProductModel>;
