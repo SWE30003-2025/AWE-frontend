@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { placeOrder } from '../api';
 import toast from 'react-hot-toast';
 
 export default function Checkout() {
@@ -52,29 +52,21 @@ export default function Checkout() {
 
     setIsSubmitting(true);
     try {
-      const orderPayload = {
-        shipping: {
-          name: form.name,
-          address: form.address,
-          city: form.city,
-          postal: form.postal,
-        },
-        items: cart.items.map(item => ({
-          product_id: item.product,
-          quantity: item.quantity,
-        }))
+      const shippingInfo = {
+        shipping_full_name: form.name,
+        shipping_address: form.address,
+        shipping_city: form.city,
+        shipping_postal_code: form.postal,
       };
 
-      await axios.post('http://localhost:8000/api/order/', orderPayload, {
-        headers: {
-          'Authorization': `Basic ${btoa(`${localStorage.getItem("username")}:${localStorage.getItem("password")}`)}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const order = await placeOrder(shippingInfo);
 
       toast.success('Order placed successfully!');
       clearCart();
-      navigate('/order-confirmation');
+      // Navigate to order confirmation with full order data
+      navigate('/order-confirmation', { 
+        state: { order } 
+      });
     } catch (err: any) {
       console.error(err);
       const errorMessage = err.response?.data?.error || 'Failed to place order. Please try again.';

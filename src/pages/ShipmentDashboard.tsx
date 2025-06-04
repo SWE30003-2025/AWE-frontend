@@ -169,7 +169,7 @@ export default function ShipmentDashboard() {
                 dashboardData.recent_shipments.map((shipment: ShipmentModel) => (
                   <tr key={shipment.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{shipment.id.slice(0, 8)}
+                      #{String(shipment.id).slice(0, 8)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(shipment.status)}`}>
@@ -177,7 +177,7 @@ export default function ShipmentDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {shipment.order_id ? `#${shipment.order_id.slice(0, 8)}` : 'N/A'}
+                      {shipment.order_id ? `#${String(shipment.order_id).slice(0, 8)}` : 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {shipment.tracking_number || 'Not assigned'}

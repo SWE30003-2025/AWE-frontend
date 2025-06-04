@@ -252,6 +252,23 @@ export async function removeFromCart(product_id: string): Promise<void> {
   }
 }
 
+export async function placeOrder(shippingInfo: {
+  shipping_full_name: string;
+  shipping_address: string;
+  shipping_city: string;
+  shipping_postal_code: string;
+}): Promise<OrderModel> {
+  try {
+    const response = await api.post("/api/shopping-cart/place-order/", shippingInfo);
+    return response.data;
+  } catch (error) {
+    console.error("Error placing order:", error);
+    throw error;
+  }
+}
+
+
+
 // ===== Shipment APIs =====
 
 export async function getShipmentDashboard(): Promise<ShipmentDashboardData> {
