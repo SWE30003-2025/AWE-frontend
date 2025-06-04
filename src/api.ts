@@ -158,7 +158,7 @@ export async function register(user: Omit<import('./models/UserModel').UserModel
 
 export async function updateUser(id: string, data: Partial<import('./models/UserModel').UserModel> & { password?: string }): Promise<import('./models/UserModel').UserModel> {
   try {
-    const response = await api.put(`/api/user/${id}`, data);
+    const response = await api.put(`/api/user/${id}/`, data);
     return response.data;
   } catch (error) {
     console.error("Error updating user:", error);
