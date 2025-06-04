@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProduct, Product } from '../api';
+import { getProduct } from '../api';
+import type { ProductModel } from '../models/ProductModel';
 import { useCart } from '../contexts/CartContext';
 import toast from 'react-hot-toast';
 
@@ -8,7 +9,7 @@ export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

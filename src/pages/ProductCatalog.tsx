@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import ProductCard from '../components/ProductCard';
-import { getProducts, Product, getCategories, Category } from '../api';
+import { getProducts, getCategories } from '../api';
+import type { ProductModel } from '../models/ProductModel';
+import type { CategoryModel } from '../models/CategoryModel';
 
 export default function ProductCatalog() {
   const [search, setSearch] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<ProductModel[]>([]);
+  const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -46,7 +48,7 @@ export default function ProductCatalog() {
   }, [selectedCategories]);
 
   // Filter products by search text (client-side filtering for search)
-  const filteredProducts = products.filter((product: Product) =>
+  const filteredProducts = products.filter((product: ProductModel) =>
     product.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -195,7 +197,7 @@ export default function ProductCatalog() {
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {filteredProducts.length > 0 ? (
-          filteredProducts.map((product: Product) => (
+          filteredProducts.map((product: ProductModel) => (
             <ProductCard key={product.id} product={product} />
           ))
         ) : (

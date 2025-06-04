@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { Product, CartItem } from "../api";
+import type { ProductModel } from "../models/ProductModel";
+import type { CartItemModel } from "../models/CartItemModel";
 
 interface CartContextType {
-  cart: CartItem[];
-  addToCart: (product: Product) => void;
+  cart: CartItemModel[];
+  addToCart: (product: ProductModel) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -12,10 +13,10 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItemModel[]>([]);
 
   // Add item to cart
-  const addToCart = (product: Product) => {
+  const addToCart = (product: ProductModel) => {
     setCart((prev) => {
       const existingItem = prev.find(item => item.id === product.id);
       if (existingItem) {

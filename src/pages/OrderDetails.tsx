@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getOrders, Order } from "../api";
+import { getOrders } from "../api";
+import type { OrderModel } from "../models/OrderModel";
 
 export default function OrderDetails() {
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OrderModel | null>(null);
   const { id } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadOrder = async () => {
       const allOrders = await getOrders();
-      const found = allOrders.find((o: Order) => o.id === Number(id));
+      const found = allOrders.find((o: OrderModel) => o.id === Number(id));
       if (!found) {
         navigate("/my-orders");
         return;

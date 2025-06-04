@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { listUsers, User } from "../api";
+import { listUsers } from "../api";
+import type { UserModel } from "../models/UserModel";
 
 export default function Home() {
-  const [users, setUsers] = useState<Array<User>>([]);
+  const [users, setUsers] = useState<UserModel[]>([]);
 
   useEffect(() => {
     listUsers().then(setUsers);

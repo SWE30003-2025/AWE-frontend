@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from "react";
-import { getCurrentUser, updateUser, User } from "../api";
+import { getCurrentUser, updateUser } from "../api";
+import type { UserModel } from "../models/UserModel";
 import toast from "react-hot-toast";
 
 interface ProfileForm {
@@ -11,6 +12,7 @@ interface ProfileForm {
 }
 
 export default function Profile() {
+  const [user, setUser] = useState<UserModel | null>(null);
   const [form, setForm] = useState<ProfileForm>({
     id: "",
     firstName: "",
@@ -24,6 +26,7 @@ export default function Profile() {
     const loadUser = async () => {
       const user = await getCurrentUser();
       if (user) {
+        setUser(user);
         setForm({
           id: user.id,
           firstName: user.firstName,

@@ -3,6 +3,6 @@ export interface ProductModel {
   name: string;
   description: string;
   price: number;
-  created_at: string;
-  updated_at: string;
+  stock: number;
+  category: string;
 }

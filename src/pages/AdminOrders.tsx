@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { getOrders, Order } from "../api";
+import { getOrders } from "../api";
+import type { OrderModel } from "../models/OrderModel";
 
 export default function AdminOrders() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderModel[]>([]);
 
   useEffect(() => {
     const loadOrders = async () => {

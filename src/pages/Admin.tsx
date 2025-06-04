@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { getProducts, createProduct, updateProduct, deleteProduct, Product, getSalesAnalytics } from '../api';
+import { getProducts, createProduct, updateProduct, deleteProduct, getSalesAnalytics } from '../api';
+import type { ProductModel } from '../models/ProductModel';
 import toast from 'react-hot-toast';
 
 interface ProductForm {
@@ -11,7 +12,7 @@ interface ProductForm {
 }
 
 export default function Admin() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductModel[]>([]);
   const [form, setForm] = useState<ProductForm>({
     name: "",
     description: "",
@@ -56,7 +57,7 @@ export default function Admin() {
     }
   };
 
-  const handleEdit = (product: Product) => {
+  const handleEdit = (product: ProductModel) => {
     setEditingId(product.id);
     setForm({
       name: product.name,
