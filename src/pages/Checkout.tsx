@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
-import { placeOrder } from '../api';
+import { placeOrder, getCurrentUser } from '../api';
 import toast from 'react-hot-toast';
+import type { UserModel } from '../models/UserModel';
 
 export default function Checkout() {
   const { cart, clearCart, loading, error, refreshCart } = useCart();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useState<UserModel | null>(null);
+  const [payNow, setPayNow] = useState(false);
   const [form, setForm] = useState({
     name: '',
     address: '',
@@ -38,6 +41,12 @@ export default function Checkout() {
   useEffect(() => {
     if (isLoggedIn && isCustomer) {
       refreshCart();
+      // Fetch user data to show wallet balance
+      getCurrentUser().then(userData => {
+        if (userData) {
+          setUser(userData);
+        }
+      });
     }
   }, [isLoggedIn, isCustomer]);
 
@@ -50,22 +59,40 @@ export default function Checkout() {
       return;
     }
 
+    // Check wallet balance if paying now
+    if (payNow && user && user.wallet !== undefined && cart) {
+      const userWallet = Number(user.wallet);
+      const cartTotal = Number(cart.total);
+      if (isNaN(userWallet) || isNaN(cartTotal)) {
+        toast.error("Invalid wallet or cart total.");
+        return;
+      }
+      if (userWallet < cartTotal) {
+        toast.error(`Insufficient wallet balance. Required: $${cartTotal.toFixed(2)}, Available: $${userWallet.toFixed(2)}`);
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
       const shippingInfo = {
-        shipping_full_name: form.name,
-        shipping_address: form.address,
-        shipping_city: form.city,
-        shipping_postal_code: form.postal,
+        full_name: form.name,
+        address: form.address,
+        city: form.city,
+        postal_code: form.postal,
       };
 
-      const order = await placeOrder(shippingInfo);
+      const order = await placeOrder(shippingInfo, payNow);
 
-      toast.success('Order placed successfully!');
+      if (payNow) {
+        toast.success('Order placed and paid successfully!');
+      } else {
+        toast.success('Order placed successfully! You can pay later from My Orders.');
+      }
       clearCart();
       // Navigate to order confirmation with full order data
       navigate('/order-confirmation', { 
-        state: { order } 
+        state: { order, paidNow: payNow } 
       });
     } catch (err: any) {
       console.error(err);
@@ -180,12 +207,49 @@ export default function Checkout() {
                 disabled={isSubmitting}
               />
             </div>
+
+            {/* Payment Options */}
+            <div className="border rounded p-4 bg-gray-50">
+              <h4 className="text-md font-semibold mb-3">Payment Options</h4>
+              
+              {user && user.wallet !== undefined && !isNaN(Number(user.wallet)) && cart && cart.total !== undefined && !isNaN(Number(cart.total)) && (
+                <div className="mb-3 text-sm text-gray-600">
+                  <span className="font-medium">Wallet Balance: </span>
+                  <span className={`font-bold ${Number(user.wallet) >= Number(cart.total) ? 'text-green-600' : 'text-red-600'}`}>
+                    ${Number(user.wallet).toFixed(2)}
+                  </span>
+                </div>
+              )}
+
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={payNow}
+                  onChange={(e) => setPayNow(e.target.checked)}
+                  disabled={isSubmitting || !(user && user.wallet !== undefined && !isNaN(Number(user.wallet)) && cart && cart.total !== undefined && !isNaN(Number(cart.total)) && Number(user.wallet) >= Number(cart.total))}
+                  className="rounded"
+                />
+                <span className="text-sm">
+                  Pay now with wallet 
+                  {user && user.wallet !== undefined && !isNaN(Number(user.wallet)) && cart && cart.total !== undefined && !isNaN(Number(cart.total)) && Number(user.wallet) < Number(cart.total) && (
+                    <span className="text-red-500 ml-1">(Insufficient balance)</span>
+                  )}
+                </span>
+              </label>
+              
+              {!payNow && (
+                <p className="text-xs text-gray-500 mt-2">
+                  You can pay later from your orders page
+                </p>
+              )}
+            </div>
+
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Placing Order...' : 'Place Order'}
+              {isSubmitting ? 'Processing...' : payNow ? 'Place Order & Pay Now' : 'Place Order'}
             </button>
           </form>
         </div>

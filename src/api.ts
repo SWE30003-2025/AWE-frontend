@@ -253,13 +253,17 @@ export async function removeFromCart(product_id: string): Promise<void> {
 }
 
 export async function placeOrder(shippingInfo: {
-  shipping_full_name: string;
-  shipping_address: string;
-  shipping_city: string;
-  shipping_postal_code: string;
-}): Promise<OrderModel> {
+  full_name: string;
+  address: string;
+  city: string;
+  postal_code: string;
+}, payNow: boolean = false): Promise<OrderModel> {
   try {
-    const response = await api.post("/api/shopping-cart/place-order/", shippingInfo);
+    const payload = {
+      ...shippingInfo,
+      pay_now: payNow
+    };
+    const response = await api.post("/api/shopping-cart/place-order/", payload);
     return response.data;
   } catch (error) {
     console.error("Error placing order:", error);
@@ -267,7 +271,138 @@ export async function placeOrder(shippingInfo: {
   }
 }
 
+// ===== Invoice & Payment APIs =====
 
+export async function payInvoice(invoiceId: string): Promise<{
+  message: string;
+  payment: {
+    transaction_id: string;
+    amount: string;
+    status: string;
+  };
+  receipt: {
+    receipt_number: string;
+    amount_paid: string;
+  };
+  shipment?: {
+    tracking_number: string;
+    status: string;
+    estimated_delivery: string;
+  };
+}> {
+  try {
+    const response = await api.post("/api/shopping-cart/pay-invoice/", {
+      invoice_id: invoiceId
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error paying invoice:", error);
+    throw error;
+  }
+}
+
+export async function getUserOrders(): Promise<Array<OrderModel & {
+  invoice?: {
+    id: string;
+    invoice_number: string;
+    amount_due: string;
+    status: string;
+    due_date: string;
+  };
+  receipts?: Array<{
+    id: string;
+    receipt_number: string;
+    amount_paid: string;
+    created_at: string;
+  }>;
+}>> {
+  try {
+    const response = await api.get("/api/order/");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    return [];
+  }
+}
+
+export async function getOrderInvoice(orderId: string): Promise<{
+  id: string;
+  invoice_number: string;
+  amount_due: string;
+  status: string;
+  due_date: string;
+  created_at: string;
+} | null> {
+  try {
+    const response = await api.get(`/api/order/${orderId}/invoice/`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching order invoice:", error);
+    return null;
+  }
+}
+
+export async function getOrderReceipts(orderId: string): Promise<Array<{
+  id: string;
+  receipt_number: string;
+  amount_paid: string;
+  payment_transaction_id: string;
+  created_at: string;
+}>> {
+  try {
+    const response = await api.get(`/api/order/${orderId}/receipts/`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching order receipts:", error);
+    return [];
+  }
+}
+
+export async function getUserInvoices(): Promise<Array<{
+  id: string;
+  invoice_number: string;
+  amount_due: string;
+  status: string;
+  due_date: string;
+  created_at: string;
+  order: {
+    id: string;
+    created_at: string;
+    shipping_full_name: string;
+  };
+}>> {
+  try {
+    const response = await api.get("/api/invoice/my-invoices/");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user invoices:", error);
+    return [];
+  }
+}
+
+export async function getUserReceipts(): Promise<Array<{
+  id: string;
+  receipt_number: string;
+  amount_paid: string;
+  created_at: string;
+  payment: {
+    transaction_id: string;
+    status: string;
+  };
+  order: {
+    id: string;
+    created_at: string;
+    shipping_full_name: string;
+  };
+}>> {
+  try {
+    const response = await api.get("/api/receipt/my-receipts/");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user receipts:", error);
+    return [];
+  }
+}
 
 // ===== Shipment APIs =====
 
