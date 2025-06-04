@@ -7,6 +7,7 @@ interface ProductForm {
   description: string;
   price: string;
   stock: string;
+  category: string;
 }
 
 export default function Admin() {
@@ -16,6 +17,7 @@ export default function Admin() {
     description: "",
     price: "",
     stock: "",
+    category: "",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<any>(null);
@@ -27,16 +29,17 @@ export default function Admin() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.price || !form.stock) return;
+    if (!form.name || !form.price || !form.stock || !form.category) return;
     try {
       const newProduct = await createProduct({
         name: form.name,
         description: form.description,
         price: parseFloat(form.price),
         stock: parseInt(form.stock, 10),
+        category: form.category,
       });
       setProducts([...products, newProduct]);
-      setForm({ name: "", description: "", price: "", stock: "" });
+      setForm({ name: "", description: "", price: "", stock: "", category: "" });
       toast.success("Product added!");
     } catch {
       toast.error("Failed to add product");
@@ -60,6 +63,7 @@ export default function Admin() {
       description: product.description,
       price: product.price.toString(),
       stock: product.stock?.toString() ?? "",
+      category: product.category,
     });
   };
 
@@ -72,10 +76,11 @@ export default function Admin() {
         description: form.description,
         price: parseFloat(form.price),
         stock: parseInt(form.stock, 10),
+        category: form.category,
       });
       setProducts(products.map(p => p.id === editingId ? updatedProduct : p));
       setEditingId(null);
-      setForm({ name: "", description: "", price: "", stock: "" });
+      setForm({ name: "", description: "", price: "", stock: "", category: "" });
       toast.success("Product updated!");
     } catch {
       toast.error("Failed to update product");
@@ -94,9 +99,13 @@ export default function Admin() {
           <div className="mt-2">
             <span className="font-semibold">Popular Products:</span>
             <ul className="list-disc ml-6">
-              {analytics.popular_products.map((p: any, idx: number) => (
-                <li key={idx}>{p.product__name} - Sold: {p.total_sold}</li>
-              ))}
+              {analytics.popular_products && analytics.popular_products.length > 0 ? (
+                analytics.popular_products.map((p: any, idx: number) => (
+                  <li key={idx}>{p.product__name} - Sold: {p.total_sold}</li>
+                ))
+              ) : (
+                <li>No popular products data available</li>
+              )}
             </ul>
           </div>
         </div>
@@ -130,6 +139,14 @@ export default function Admin() {
             min={0}
             required
           />
+          <input
+            type="text"
+            placeholder="Category"
+            value={form.category}
+            onChange={e => setForm({ ...form, category: e.target.value })}
+            className="border p-2 rounded"
+            required
+          />
         </div>
         <textarea
           placeholder="Description"
@@ -153,6 +170,7 @@ export default function Admin() {
             <p className="text-gray-600">{prod.description}</p>
             <p className="font-bold text-blue-700">${prod.price}</p>
             <p className="text-gray-800">Stock: {prod.stock}</p>
+            <p className="text-gray-600">Category: {prod.category}</p>
             <div className="mt-4 flex gap-2">
               <button
                 onClick={() => handleEdit(prod)}

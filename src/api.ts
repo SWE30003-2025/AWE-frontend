@@ -53,8 +53,7 @@ export interface Product {
   description: string;
   price: number;
   stock: number;
-  created_at: string;
-  updated_at: string;
+  category: string;
 }
 
 export interface CartItem extends Product {
@@ -112,6 +111,16 @@ export async function getProducts(categories?: string[]): Promise<Product[]> {
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
+  }
+}
+
+export async function getProduct(id: string): Promise<Product> {
+  try {
+    const response = await api.get(`/api/product/${id}/`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    throw error;
   }
 }
 
