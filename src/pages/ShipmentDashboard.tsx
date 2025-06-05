@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getShipmentDashboard } from '../api';
+import { getShipmentDashboard, updateShipmentStatus } from '../api';
 import type { ShipmentDashboardData, ShipmentModel } from '../models/ShipmentModel';
 import toast from 'react-hot-toast';
 
 export default function ShipmentDashboard() {
   const [dashboardData, setDashboardData] = useState<ShipmentDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedShipment, setSelectedShipment] = useState<ShipmentModel | null>(null);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
   const navigate = useNavigate();
   const userRole = localStorage.getItem("userRole");
   const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -66,6 +70,60 @@ export default function ShipmentDashboard() {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleStatusUpdate = async () => {
+    if (!selectedShipment || !newStatus) {
+      toast.error('Please select a valid status');
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      const result = await updateShipmentStatus(String(selectedShipment.id), newStatus);
+      
+      // Update the shipment in the dashboard data
+      if (dashboardData) {
+        const updatedShipments = dashboardData.recent_shipments.map(shipment =>
+          shipment.id === selectedShipment.id ? result.shipment : shipment
+        );
+
+        // Update status counts
+        const newStatusCounts = { ...dashboardData.status_counts };
+        if (selectedShipment.status in newStatusCounts) {
+          newStatusCounts[selectedShipment.status]--;
+        }
+        if (newStatus in newStatusCounts) {
+          newStatusCounts[newStatus] = (newStatusCounts[newStatus] || 0) + 1;
+        }
+
+        setDashboardData({
+          ...dashboardData,
+          recent_shipments: updatedShipments,
+          status_counts: newStatusCounts
+        });
+      }
+
+      toast.success(result.message);
+      closeStatusModal();
+    } catch (error: any) {
+      console.error('Error updating shipment status:', error);
+      toast.error(error.response?.data?.error || 'Failed to update shipment status');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const openStatusModal = (shipment: ShipmentModel) => {
+    setSelectedShipment(shipment);
+    setNewStatus(shipment.status);
+    setIsStatusModalOpen(true);
+  };
+
+  const closeStatusModal = () => {
+    setSelectedShipment(null);
+    setNewStatus('');
+    setIsStatusModalOpen(false);
   };
 
   if (loading) {
@@ -153,12 +211,15 @@ export default function ShipmentDashboard() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created At
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {dashboardData.recent_shipments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                     No shipments found
                   </td>
                 </tr>
@@ -182,6 +243,14 @@ export default function ShipmentDashboard() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(shipment.created_at)}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button
+                        onClick={() => openStatusModal(shipment)}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        Update Status
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -189,6 +258,57 @@ export default function ShipmentDashboard() {
           </table>
         </div>
       </div>
+
+      {isStatusModalOpen && selectedShipment && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900">
+                Update Shipment Status
+              </h3>
+              <div className="mt-2">
+                <p className="text-sm text-gray-500">
+                  Shipment ID: #{String(selectedShipment.id).slice(0, 8)}
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Current Status: {selectedShipment.status}
+                </p>
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value)}
+                  className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  disabled={isUpdating}
+                >
+                  <option value="">Select new status</option>
+                  <option value="pending">Pending</option>
+                  <option value="processing">Processing</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="in_transit">In Transit</option>
+                  <option value="out_for_delivery">Out for Delivery</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="failed">Failed</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 mt-4">
+                <button
+                  onClick={closeStatusModal}
+                  className="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  disabled={isUpdating}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleStatusUpdate}
+                  className="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isUpdating || !newStatus}
+                >
+                  {isUpdating ? 'Updating...' : 'Update Status'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

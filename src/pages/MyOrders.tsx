@@ -160,7 +160,6 @@ export default function MyOrders() {
             return (
               <div key={order.id} className="border rounded-lg bg-white shadow-sm">
                 <div className="p-6">
-                  {/* Order Header */}
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-lg font-semibold">Order #{order.id}</h3>
@@ -173,7 +172,6 @@ export default function MyOrders() {
                     </span>
                   </div>
 
-                  {/* Order Items */}
                   <div className="mb-4">
                     <h4 className="font-medium mb-2">Items:</h4>
                     <div className="space-y-1">
@@ -190,7 +188,6 @@ export default function MyOrders() {
                     </div>
                   </div>
 
-                  {/* Order Total */}
                   <div className="border-t pt-2 mb-4">
                     <div className="flex justify-between font-semibold">
                       <span>Total:</span>
@@ -198,13 +195,48 @@ export default function MyOrders() {
                     </div>
                   </div>
 
-                  {/* Shipping Info */}
                   {order.shipping_full_name && (
                     <div className="mb-4 text-sm text-gray-600">
                       <p><strong>Shipping to:</strong></p>
                       <p>{order.shipping_full_name}</p>
                       <p>{order.shipping_address}</p>
                       <p>{order.shipping_city}, {order.shipping_postal_code}</p>
+                    </div>
+                  )}
+
+                  {order.shipment && (
+                    <div className="mb-4 bg-blue-50 rounded p-4">
+                      <h5 className="font-medium text-blue-800 mb-2">Shipment Details:</h5>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-blue-700">
+                            <span className="font-medium">Status: </span>
+                            <span className="capitalize">{order.shipment.status}</span>
+                          </p>
+                          <p className="text-blue-700">
+                            <span className="font-medium">Carrier: </span>
+                            {order.shipment.carrier}
+                          </p>
+                          <p className="text-blue-700">
+                            <span className="font-medium">Tracking #: </span>
+                            <span className="font-mono">{order.shipment.tracking_number}</span>
+                          </p>
+                        </div>
+                        <div>
+                          {order.shipment.estimated_delivery && (
+                            <p className="text-blue-700">
+                              <span className="font-medium">Est. Delivery: </span>
+                              {new Date(order.shipment.estimated_delivery).toLocaleDateString()}
+                            </p>
+                          )}
+                          {order.shipment.actual_delivery && (
+                            <p className="text-blue-700">
+                              <span className="font-medium">Delivered On: </span>
+                              {new Date(order.shipment.actual_delivery).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
 

@@ -3,7 +3,7 @@ import type { CategoryModel } from './models/CategoryModel';
 import type { ProductModel, CreateProductModel, UpdateProductModel } from './models/ProductModel';
 import type { OrderModel } from './models/OrderModel';
 import type { UserModel, CreateUserModel, UpdateUserModel } from './models/UserModel';
-import type { ShipmentDashboardData } from './models/ShipmentModel';
+import type { ShipmentDashboardData, ShipmentModel } from './models/ShipmentModel';
 import type { ShoppingCartModel } from './models/ShoppingCartModel';
 import type { CartItemModel, CreateCartItemModel, UpdateCartItemModel } from './models/CartItemModel';
 
@@ -471,6 +471,21 @@ export async function getShipmentDashboard(): Promise<ShipmentDashboardData> {
     return response.data;
   } catch (error) {
     console.error("Error fetching shipment dashboard:", error);
+    throw error;
+  }
+}
+
+export async function updateShipmentStatus(shipmentId: string, status: string): Promise<{
+  message: string;
+  shipment: ShipmentModel;
+}> {
+  try {
+    const response = await api.post(`/api/shipment/${shipmentId}/update-status/`, {
+      status
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating shipment status:", error);
     throw error;
   }
 }
