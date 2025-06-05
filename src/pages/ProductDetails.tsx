@@ -14,6 +14,11 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Check if user is logged in and is a customer
+  const isLoggedIn = !!localStorage.getItem("userId");
+  const userRole = localStorage.getItem("userRole");
+  const isCustomer = userRole === "customer";
+
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) {
@@ -39,6 +44,18 @@ export default function ProductDetails() {
   }, [id]);
 
   const handleAddToCart = () => {
+    if (!isLoggedIn) {
+      toast.error("Please log in to add items to your cart");
+      navigate("/login");
+
+      return;
+    }
+
+    if (!isCustomer) {
+      toast.error("Only customers can add items to cart");
+      return;
+    }
+
     if (product) {
       // Add the product multiple times based on selected quantity
       for (let i = 0; i < quantity; i++) {
@@ -46,6 +63,10 @@ export default function ProductDetails() {
       }
       toast.success(`Added ${quantity} item${quantity > 1 ? 's' : ''} to cart!`);
     }
+  };
+
+  const handleLoginRedirect = () => {
+    navigate("/login");
   };
 
   const handleQuantityChange = (newQuantity: number) => {
@@ -143,8 +164,7 @@ export default function ProductDetails() {
                 </p>
               </div>
 
-              {/* Quantity Selection */}
-              {product.stock > 0 && (
+              {isLoggedIn && isCustomer && product.stock > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Quantity</h3>
                   <div className="flex items-center space-x-3">
@@ -175,17 +195,33 @@ export default function ProductDetails() {
               )}
 
               <div className="pt-4 border-t">
-                <button
-                  onClick={handleAddToCart}
-                  disabled={product.stock === 0}
-                  className={`w-full py-3 px-6 rounded-lg font-semibold transition ${
-                    product.stock > 0
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  {product.stock > 0 ? `Add ${quantity} to Cart` : 'Out of Stock'}
-                </button>
+                {!isLoggedIn ? (
+                  <button
+                    onClick={handleLoginRedirect}
+                    className="w-full py-3 px-6 rounded-lg font-semibold transition bg-green-600 text-white hover:bg-green-700"
+                  >
+                    Please log in to buy this product
+                  </button>
+                ) : !isCustomer ? (
+                  <button
+                    disabled
+                    className="w-full py-3 px-6 rounded-lg font-semibold bg-gray-300 text-gray-500 cursor-not-allowed"
+                  >
+                    Only customers can purchase products
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={product.stock === 0}
+                    className={`w-full py-3 px-6 rounded-lg font-semibold transition ${
+                      product.stock > 0
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {product.stock > 0 ? `Add ${quantity} to Cart` : 'Out of Stock'}
+                  </button>
+                )}
               </div>
 
               <div className="text-sm text-gray-500 space-y-1">
