@@ -1,7 +1,8 @@
 import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
 import { register } from "../api";
-import toast from 'react-hot-toast';
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -18,7 +19,9 @@ export default function Register() {
     e.preventDefault();
     try {
       await register(form);
+
       toast.success("Registration successful! Please login.");
+
       navigate("/login");
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Registration failed. Please try again.");
@@ -27,10 +30,16 @@ export default function Register() {
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">
+        Register
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-gray-700 mb-2">Username</label>
+          <label className="block text-gray-700 mb-2">
+            Username
+          </label>
+
           <input
             type="text"
             value={form.username}
@@ -39,8 +48,12 @@ export default function Register() {
             required
           />
         </div>
+
         <div>
-          <label className="block text-gray-700 mb-2">First Name</label>
+          <label className="block text-gray-700 mb-2">
+            First Name
+          </label>
+
           <input
             type="text"
             value={form.firstName}
@@ -49,8 +62,12 @@ export default function Register() {
             required
           />
         </div>
+
         <div>
-          <label className="block text-gray-700 mb-2">Last Name</label>
+          <label className="block text-gray-700 mb-2">
+            Last Name
+          </label>
+
           <input
             type="text"
             value={form.lastName}
@@ -59,8 +76,12 @@ export default function Register() {
             required
           />
         </div>
+
         <div>
-          <label className="block text-gray-700 mb-2">Email</label>
+          <label className="block text-gray-700 mb-2">
+            Email
+          </label>
+
           <input
             type="email"
             value={form.email}
@@ -69,8 +90,12 @@ export default function Register() {
             required
           />
         </div>
+
         <div>
-          <label className="block text-gray-700 mb-2">Phone Number</label>
+          <label className="block text-gray-700 mb-2">
+            Phone Number
+          </label>
+
           <input
             type="tel"
             value={form.phone}
@@ -79,8 +104,12 @@ export default function Register() {
             required
           />
         </div>
+
         <div>
-          <label className="block text-gray-700 mb-2">Password</label>
+          <label className="block text-gray-700 mb-2">
+            Password
+          </label>
+
           <input
             type="password"
             value={form.password}
@@ -89,6 +118,7 @@ export default function Register() {
             required
           />
         </div>
+
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
@@ -98,4 +128,4 @@ export default function Register() {
       </form>
     </div>
   );
-}
+};

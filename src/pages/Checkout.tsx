@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useCart } from '../contexts/CartContext';
-import { useNavigate } from 'react-router-dom';
-import { placeOrder, getCurrentUser, payInvoice } from '../api';
-import toast from 'react-hot-toast';
-import type { UserModel } from '../models/UserModel';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
+import { useCart } from "../contexts/CartContext";
+
+import { placeOrder, getCurrentUser, payInvoice } from "../api";
+
+import type { UserModel } from "../models/UserModel";
 
 export default function Checkout() {
   const { cart, clearCart, loading, error, refreshCart } = useCart();
@@ -12,10 +15,10 @@ export default function Checkout() {
   const [user, setUser] = useState<UserModel | null>(null);
   const [payNow, setPayNow] = useState(false);
   const [form, setForm] = useState({
-    name: '',
-    address: '',
-    city: '',
-    postal: ''
+    name: "",
+    address: "",
+    city: "",
+    postal: ""
   });
 
   // Check if user is a customer
@@ -24,16 +27,20 @@ export default function Checkout() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate('/login');
+      navigate("/login");
+
       return;
     }
     if (!isCustomer) {
-      navigate('/');
+      navigate("/");
+
       toast.error("Only customers can checkout");
+
       return;
     }
     if (cart && cart.items.length === 0) {
-      navigate('/cart');
+      navigate("/cart");
+
       return;
     }
   }, [cart, navigate, isLoggedIn, isCustomer]);
@@ -41,7 +48,7 @@ export default function Checkout() {
   useEffect(() => {
     if (isLoggedIn && isCustomer) {
       refreshCart();
-      // Fetch user data to show wallet balance
+
       getCurrentUser().then(userData => {
         if (userData) {
           setUser(userData);
@@ -55,7 +62,9 @@ export default function Checkout() {
 
     if (!cart || cart.items.length === 0) {
       toast.error("Your cart is empty");
-      navigate('/cart');
+
+      navigate("/cart");
+
       return;
     }
 
@@ -63,10 +72,13 @@ export default function Checkout() {
     if (payNow && user && user.wallet !== undefined && cart) {
       const userWallet = Number(user.wallet);
       const cartTotal = Number(cart.total);
+
       if (isNaN(userWallet) || isNaN(cartTotal)) {
         toast.error("Invalid wallet or cart total.");
+
         return;
       }
+
       if (userWallet < cartTotal) {
         toast.error(`Insufficient wallet balance. Required: $${cartTotal.toFixed(2)}, Available: $${userWallet.toFixed(2)}`);
         return;
@@ -92,39 +104,43 @@ export default function Checkout() {
           
           finalOrder = {
             ...orderResponse,
-            payment_status: 'paid',
+            payment_status: "paid",
             invoice: {
               ...(orderResponse as any).invoice,
-              status: 'paid'
+              status: "paid"
             },
             payment: paymentResponse.payment,
             receipt: paymentResponse.receipt,
             shipment: paymentResponse.shipment
           };
 
-          toast.success('Order placed and paid successfully!');
+          toast.success("Order placed and paid successfully!");
         } catch (paymentErr: any) {
-          console.error('Payment error:', paymentErr);
-          const paymentErrorMessage = paymentErr.response?.data?.error || 'Payment failed after order placement.';
+          console.error("Payment error:", paymentErr);
+
+          const paymentErrorMessage = paymentErr.response?.data?.error || "Payment failed after order placement.";
+
           toast.error(`Order placed but ${paymentErrorMessage} You can pay later from My Orders.`);
           
           finalOrder = orderResponse;
         }
       } else {
-        toast.success('Order placed successfully! You can pay later from My Orders.');
+        toast.success("Order placed successfully! You can pay later from My Orders.");
       }
 
       clearCart();
-      
-      navigate('/order-confirmation', { 
-        state: { 
-          order: finalOrder, 
-          paidNow: payNow && finalOrder.payment_status === 'paid'
+
+      navigate("/order-confirmation", {
+        state: {
+          order: finalOrder,
+          paidNow: payNow && finalOrder.payment_status === "paid",
         } 
       });
     } catch (err: any) {
-      console.error('Order placement error:', err);
-      const errorMessage = err.response?.data?.error || 'Failed to place order. Please try again.';
+      console.error("Order placement error:", err);
+
+      const errorMessage = err.response?.data?.error || "Failed to place order. Please try again.";
+
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -134,8 +150,13 @@ export default function Checkout() {
   if (!isLoggedIn) {
     return (
       <div className="max-w-4xl mx-auto p-4 text-center">
-        <h2 className="text-2xl font-bold mb-6">Checkout</h2>
-        <p className="text-gray-500">Please log in to checkout.</p>
+        <h2 className="text-2xl font-bold mb-6">
+          Checkout
+        </h2>
+
+        <p className="text-gray-500">
+          Please log in to checkout.
+        </p>
       </div>
     );
   }
@@ -143,8 +164,13 @@ export default function Checkout() {
   if (!isCustomer) {
     return (
       <div className="max-w-4xl mx-auto p-4 text-center">
-        <h2 className="text-2xl font-bold mb-6">Checkout</h2>
-        <p className="text-gray-500">Only customers can checkout.</p>
+        <h2 className="text-2xl font-bold mb-6">
+          Checkout
+        </h2>
+
+        <p className="text-gray-500">
+          Only customers can checkout.
+        </p>
       </div>
     );
   }
@@ -152,8 +178,13 @@ export default function Checkout() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto p-4 text-center">
-        <h2 className="text-2xl font-bold mb-6">Checkout</h2>
-        <p className="text-gray-500">Loading cart...</p>
+        <h2 className="text-2xl font-bold mb-6">
+          Checkout
+        </h2>
+
+        <p className="text-gray-500">
+          Loading cart...
+        </p>
       </div>
     );
   }
@@ -161,10 +192,14 @@ export default function Checkout() {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto p-4">
-        <h2 className="text-2xl font-bold mb-6">Checkout</h2>
+        <h2 className="text-2xl font-bold mb-6">
+          Checkout
+        </h2>
+
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           Error: {error}
         </div>
+
         <button 
           onClick={refreshCart}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
@@ -178,10 +213,16 @@ export default function Checkout() {
   if (!cart || cart.items.length === 0) {
     return (
       <div className="max-w-4xl mx-auto p-4 text-center">
-        <h2 className="text-2xl font-bold mb-6">Checkout</h2>
-        <p className="text-gray-500 mb-4">Your cart is empty.</p>
-        <button 
-          onClick={() => navigate('/products')}
+        <h2 className="text-2xl font-bold mb-6">
+          Checkout
+        </h2>
+
+        <p className="text-gray-500 mb-4">
+          Your cart is empty.
+        </p>
+
+        <button
+          onClick={() => navigate("/products")}
           className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
         >
           Continue Shopping
@@ -192,10 +233,16 @@ export default function Checkout() {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-6">Checkout</h2>
+      <h2 className="text-2xl font-bold mb-6">
+        Checkout
+      </h2>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <h3 className="text-lg font-semibold mb-4">Shipping Information</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            Shipping Information
+          </h3>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
@@ -206,6 +253,7 @@ export default function Checkout() {
               required
               disabled={isSubmitting}
             />
+
             <input
               type="text"
               placeholder="Address"
@@ -215,6 +263,7 @@ export default function Checkout() {
               required
               disabled={isSubmitting}
             />
+
             <div className="grid grid-cols-2 gap-4">
               <input
                 type="text"
@@ -225,6 +274,7 @@ export default function Checkout() {
                 required
                 disabled={isSubmitting}
               />
+
               <input
                 type="text"
                 placeholder="Postal Code"
@@ -236,14 +286,18 @@ export default function Checkout() {
               />
             </div>
 
-            {/* Payment Options */}
             <div className="border rounded p-4 bg-gray-50">
               <h4 className="text-md font-semibold mb-3">Payment Options</h4>
               
               {user && user.wallet !== undefined && !isNaN(Number(user.wallet)) && cart && cart.total !== undefined && !isNaN(Number(cart.total)) && (
                 <div className="mb-3 text-sm text-gray-600">
-                  <span className="font-medium">Wallet Balance: </span>
-                  <span className={`font-bold ${Number(user.wallet) >= Number(cart.total) ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className="font-medium">
+                    Wallet Balance: 
+                  </span>
+
+                  <span 
+                    className={`font-bold ${Number(user.wallet) >= Number(cart.total) ? "text-green-600" : "text-red-600"}`}
+                  >
                     ${Number(user.wallet).toFixed(2)}
                   </span>
                 </div>
@@ -257,8 +311,10 @@ export default function Checkout() {
                   disabled={isSubmitting || !(user && user.wallet !== undefined && !isNaN(Number(user.wallet)) && cart && cart.total !== undefined && !isNaN(Number(cart.total)) && Number(user.wallet) >= Number(cart.total))}
                   className="rounded"
                 />
+
                 <span className="text-sm">
                   Pay now with wallet 
+
                   {user && user.wallet !== undefined && !isNaN(Number(user.wallet)) && cart && cart.total !== undefined && !isNaN(Number(cart.total)) && Number(user.wallet) < Number(cart.total) && (
                     <span className="text-red-500 ml-1">(Insufficient balance)</span>
                   )}
@@ -277,27 +333,46 @@ export default function Checkout() {
               className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Processing...' : payNow ? 'Place Order & Pay Now' : 'Place Order'}
+              {isSubmitting ? "Processing..." : payNow ? "Place Order & Pay Now" : "Place Order"}
             </button>
           </form>
         </div>
+
         <div>
-          <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            Order Summary
+          </h3>
+
           <div className="bg-white shadow rounded-lg p-4">
             {cart.items.map(item => (
               <div key={item.id} className="flex justify-between py-2 border-b">
-                <span>{item.product_name} x {item.quantity}</span>
-                <span>${Number(item.subtotal).toFixed(2)}</span>
+                <span>
+                  {item.product_name} x {item.quantity}
+                </span>
+
+                <span>
+                  ${Number(item.subtotal).toFixed(2)}
+                </span>
               </div>
             ))}
+
             <div className="mt-4 pt-4 border-t">
               <div className="flex justify-between text-sm text-gray-600 mb-2">
-                <span>Items ({cart.total_items}):</span>
-                <span>${Number(cart.total).toFixed(2)}</span>
+                <span>
+                  Items ({cart.total_items}):
+                </span>
+
+                <span>
+                  ${Number(cart.total).toFixed(2)}
+                </span>
               </div>
+
               <div className="flex justify-between font-bold">
                 <span>Total</span>
-                <span>${Number(cart.total).toFixed(2)}</span>
+
+                <span>
+                  ${Number(cart.total).toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
@@ -305,4 +380,4 @@ export default function Checkout() {
       </div>
     </div>
   );
-}
+};

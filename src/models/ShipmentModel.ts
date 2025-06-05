@@ -8,7 +8,7 @@ export interface ShipmentModel {
   created_at: string;
   updated_at: string;
   order_id?: string;
-}
+};
 
 export interface ShipmentDashboardData {
   total_shipments: number;
@@ -17,4 +17,4 @@ export interface ShipmentDashboardData {
   in_transit_shipments: number;
   delivered_shipments: number;
   recent_shipments: ShipmentModel[];
-} 
+};

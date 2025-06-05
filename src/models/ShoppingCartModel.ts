@@ -1,4 +1,4 @@
-import type { CartItemModel } from './CartItemModel';
+import type { CartItemModel } from "./CartItemModel";
 
 export interface ShoppingCartModel {
   id: string;
@@ -6,4 +6,4 @@ export interface ShoppingCartModel {
   total: number;
   total_items: number;
   items: CartItemModel[];
-} 
+} ;

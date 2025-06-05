@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { getProductsForInventory, updateProductStock } from "../api";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+
+import { getProductsForInventory, updateProductStock } from "../api";
+
 import type { ProductModel } from "../models/ProductModel";
 
 interface StockUpdateForm {
   productId: string;
   amount: number;
   reason: string;
-}
+};
 
 export default function InventoryManagement() {
   const [products, setProducts] = useState<ProductModel[]>([]);
@@ -31,13 +33,17 @@ export default function InventoryManagement() {
 
     if (!isLoggedIn) {
       toast.error("Please log in to access this page");
+
       navigate("/login");
+
       return;
     }
 
     if (userRole !== "admin" && userRole !== "inventory_manager") {
       toast.error("You don't have permission to access this page");
+
       navigate("/");
+
       return;
     }
 
@@ -51,11 +57,14 @@ export default function InventoryManagement() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+
       const data = await getProductsForInventory(showInactive);
+
       setProducts(data);
     } catch (error) {
-      console.error('Error fetching products:', error);
-      toast.error('Failed to load products');
+      console.error("Error fetching products:", error);
+
+      toast.error("Failed to load products");
     } finally {
       setLoading(false);
     }
@@ -80,17 +89,21 @@ export default function InventoryManagement() {
 
   const openStockModal = (product: ProductModel) => {
     setSelectedProduct(product);
+
     setStockForm({
       productId: product.id,
       amount: 0,
       reason: ""
     });
+
     setIsModalOpen(true);
   };
 
   const closeStockModal = () => {
     setIsModalOpen(false);
+
     setSelectedProduct(null);
+
     setStockForm({
       productId: "",
       amount: 0,
@@ -103,6 +116,7 @@ export default function InventoryManagement() {
     
     if (!selectedProduct || stockForm.amount === 0) {
       toast.error("Please enter a valid amount");
+
       return;
     }
 
@@ -116,24 +130,32 @@ export default function InventoryManagement() {
       ));
       
       toast.success(result.message);
+
       closeStockModal();
     } catch (error) {
-      console.error('Error updating stock:', error);
-      toast.error('Failed to update stock');
+      console.error("Error updating stock:", error);
+
+      toast.error("Failed to update stock");
     }
   };
 
   const getStockStatusColor = (stock: number) => {
     if (stock === 0) return "bg-red-100 text-red-800";
+
     if (stock < 10) return "bg-orange-100 text-orange-800";
+
     if (stock < 50) return "bg-yellow-100 text-yellow-800";
+
     return "bg-green-100 text-green-800";
   };
 
   const getStockStatusText = (stock: number) => {
     if (stock === 0) return "Out of Stock";
+
     if (stock < 10) return "Low Stock";
+
     if (stock < 50) return "Medium Stock";
+
     return "In Stock";
   };
 
@@ -150,11 +172,15 @@ export default function InventoryManagement() {
   return (
     <div className="max-w-6xl mx-auto p-4">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
-        <p className="text-gray-600 mt-2">Manage product stock levels and track inventory</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Inventory Management
+        </h1>
+
+        <p className="text-gray-600 mt-2">
+          Manage product stock levels and track inventory
+        </p>
       </div>
 
-      {/* Search and Filters */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex-1">
@@ -166,6 +192,7 @@ export default function InventoryManagement() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
+
           <div className="flex items-center gap-4">
             <label className="flex items-center">
               <input
@@ -174,8 +201,12 @@ export default function InventoryManagement() {
                 onChange={(e) => setShowInactive(e.target.checked)}
                 className="mr-2"
               />
-              <span className="text-sm">Show inactive products</span>
+
+              <span className="text-sm">
+                Show inactive products
+              </span>
             </label>
+
             <div className="text-sm text-gray-600">
               Total Products: {filteredProducts.length}
             </div>
@@ -185,26 +216,46 @@ export default function InventoryManagement() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProducts.map(product => (
-          <div key={product.id} className={`bg-white rounded-lg shadow-lg overflow-hidden ${!product.is_active ? 'opacity-75' : ''}`}>
+          <div 
+            key={product.id} 
+            className={`bg-white rounded-lg shadow-lg overflow-hidden ${!product.is_active ? "opacity-75" : ""}`}
+          >
             <div className="p-6">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 truncate">{product.name}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 truncate">
+                  {product.name}
+                </h3>
+
                 <div className="flex flex-col gap-2">
-                  <span className={`px-2 py-1 text-xs rounded-full ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {product.is_active ? 'Active' : 'Inactive'}
+                  <span 
+                    className={`px-2 py-1 text-xs rounded-full ${product.is_active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                  >
+                    {product.is_active ? "Active" : "Inactive"}
                   </span>
-                  <span className={`px-2 py-1 text-xs rounded-full ${getStockStatusColor(product.stock || 0)}`}>
+
+                  <span 
+                    className={`px-2 py-1 text-xs rounded-full ${getStockStatusColor(product.stock || 0)}`}
+                  >
                     {getStockStatusText(product.stock || 0)}
                   </span>
                 </div>
               </div>
               
               <div className="space-y-2 mb-4">
-                <p className="text-sm text-gray-600">Category: {product.category}</p>
-                <p className="text-sm text-gray-600">Price: ${product.price}</p>
+                <p className="text-sm text-gray-600">
+                  Category: {product.category}
+                </p>
+
+                <p className="text-sm text-gray-600">
+                  Price: ${product.price}
+                </p>
+
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Current Stock:</span>
-                  <span className={`font-bold text-lg ${(product.stock || 0) < 10 ? 'text-red-600' : 'text-green-600'}`}>
+                  <span className="text-sm text-gray-600">
+                    Current Stock:
+                  </span>
+
+                  <span className={`font-bold text-lg ${(product.stock || 0) < 10 ? "text-red-600" : "text-green-600"}`}>
                     {product.stock || 0}
                   </span>
                 </div>
@@ -223,20 +274,35 @@ export default function InventoryManagement() {
 
       {filteredProducts.length === 0 && !loading && (
         <div className="text-center py-12">
-          <div className="text-gray-400 text-lg">No products found</div>
-          <p className="text-gray-500 mt-2">Try adjusting your search or filters</p>
+          <div className="text-gray-400 text-lg">
+            No products found
+          </div>
+
+          <p className="text-gray-500 mt-2">
+            Try adjusting your search or filters
+          </p>
         </div>
       )}
 
       {isModalOpen && selectedProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h2 className="text-xl font-bold mb-4">Update Stock for {selectedProduct.name}</h2>
+            <h2 className="text-xl font-bold mb-4">
+              Update Stock for {selectedProduct.name}
+            </h2>
             
             <div className="mb-4 p-3 bg-gray-50 rounded">
-              <div className="text-sm text-gray-600">Current Stock: <span className="font-bold">{selectedProduct.stock}</span></div>
-              <div className="text-sm text-gray-600">Category: {selectedProduct.category}</div>
-              <div className="text-sm text-gray-600">Price: ${selectedProduct.price}</div>
+              <div className="text-sm text-gray-600">
+                Current Stock: <span className="font-bold">{selectedProduct.stock}</span>
+              </div>
+
+              <div className="text-sm text-gray-600">
+                Category: {selectedProduct.category}
+              </div>
+
+              <div className="text-sm text-gray-600">
+                Price: ${selectedProduct.price}
+              </div>
             </div>
 
             <form onSubmit={handleStockUpdate}>
@@ -244,6 +310,7 @@ export default function InventoryManagement() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Stock Adjustment Amount
                 </label>
+
                 <input
                   type="number"
                   value={stockForm.amount}
@@ -252,12 +319,14 @@ export default function InventoryManagement() {
                   placeholder="Enter positive or negative number"
                   required
                 />
+
                 <p className="text-xs text-gray-500 mt-1">
                   Use positive numbers to add stock, negative to reduce stock
                 </p>
+
                 {stockForm.amount !== 0 && (
                   <p className="text-sm mt-1">
-                    New stock will be: <span className={`font-bold ${(selectedProduct.stock || 0) + stockForm.amount < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    New stock will be: <span className={`font-bold ${(selectedProduct.stock || 0) + stockForm.amount < 0 ? "text-red-600" : "text-green-600"}`}>
                       {Math.max(0, (selectedProduct.stock || 0) + stockForm.amount)}
                     </span>
                   </p>
@@ -268,6 +337,7 @@ export default function InventoryManagement() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Reason (Optional)
                 </label>
+
                 <textarea
                   value={stockForm.reason}
                   onChange={(e) => setStockForm({...stockForm, reason: e.target.value})}
@@ -285,6 +355,7 @@ export default function InventoryManagement() {
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200"
@@ -298,4 +369,4 @@ export default function InventoryManagement() {
       )}
     </div>
   );
-} 
+};

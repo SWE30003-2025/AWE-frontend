@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProduct } from "../api";
-import type { ProductModel } from "../models/ProductModel";
-import { useCart } from "../contexts/CartContext";
 import toast from "react-hot-toast";
+
+import { getProduct } from "../api";
+
+import { useCart } from "../contexts/CartContext";
+
+import type { ProductModel } from "../models/ProductModel";
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +26,7 @@ export default function ProductDetails() {
     const fetchProduct = async () => {
       if (!id) {
         setError("Product ID not found");
+
         setLoading(false);
 
         return;
@@ -30,11 +34,15 @@ export default function ProductDetails() {
 
       try {
         setLoading(true);
+
         const productData = await getProduct(id);
+
         setProduct(productData);
+        
         setError(null);
       } catch (err) {
         setError("Failed to load product details. Please try again later.");
+
         console.error("Error loading product:", err);
       } finally {
         setLoading(false);
@@ -47,6 +55,7 @@ export default function ProductDetails() {
   const handleAddToCart = () => {
     if (!isLoggedIn) {
       toast.error("Please log in to add items to your cart");
+
       navigate("/login");
 
       return;
@@ -54,6 +63,7 @@ export default function ProductDetails() {
 
     if (!isCustomer) {
       toast.error("Only customers can add items to cart");
+
       return;
     }
 
@@ -61,6 +71,7 @@ export default function ProductDetails() {
       for (let i = 0; i < quantity; i++) {
         addToCart(product);
       }
+
       toast.success(`Added ${quantity} item${quantity > 1 ? "s" : ""} to cart!`);
     }
   };
@@ -91,6 +102,7 @@ export default function ProductDetails() {
     return (
       <div className="max-w-4xl mx-auto text-center py-8">
         <p className="text-red-600 mb-4">{error}</p>
+
         <button
           onClick={handleBackToCatalog}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
@@ -105,6 +117,7 @@ export default function ProductDetails() {
     return (
       <div className="max-w-4xl mx-auto text-center py-8">
         <p className="text-gray-600 mb-4">Product not found</p>
+
         <button
           onClick={handleBackToCatalog}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
@@ -125,6 +138,7 @@ export default function ProductDetails() {
           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
+
           Back to Catalog
         </button>
       </div>
@@ -140,17 +154,29 @@ export default function ProductDetails() {
 
             <div className="space-y-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-                <p className="text-2xl font-bold text-blue-700">${product.price}</p>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {product.name}
+                </h1>
+                <p className="text-2xl font-bold text-blue-700">
+                  ${product.price}
+                </p>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
-                <p className="text-gray-600">{product.description}</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Description
+                </h3>
+
+                <p className="text-gray-600">
+                  {product.description}
+                </p>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Stock</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Stock
+                </h3>
+
                 <p className="text-gray-600">
                   {product.stock > 0 ? (
                     <span className="text-green-600">{product.stock} items available</span>
@@ -162,7 +188,10 @@ export default function ProductDetails() {
 
               {isLoggedIn && isCustomer && product.stock > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Quantity</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Quantity
+                  </h3>
+
                   <div className="flex items-center space-x-3">
                     <button
                       onClick={() => handleQuantityChange(quantity - 1)}
@@ -171,6 +200,7 @@ export default function ProductDetails() {
                     >
                       −
                     </button>
+
                     <input
                       type="number"
                       min="1"
@@ -179,6 +209,7 @@ export default function ProductDetails() {
                       onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
                       className="w-20 text-center border border-gray-300 rounded px-2 py-1"
                     />
+
                     <button
                       onClick={() => handleQuantityChange(quantity + 1)}
                       disabled={quantity >= product.stock}
@@ -211,11 +242,11 @@ export default function ProductDetails() {
                     disabled={product.stock === 0}
                     className={`w-full py-3 px-6 rounded-lg font-semibold transition ${
                       product.stock > 0
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
                     }`}
                   >
-                    {product.stock > 0 ? `Add ${quantity} to Cart` : 'Out of Stock'}
+                    {product.stock > 0 ? `Add ${quantity} to Cart` : "Out of Stock"}
                   </button>
                 )}
               </div>

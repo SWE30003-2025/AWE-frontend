@@ -8,7 +8,7 @@ export interface UserModel {
   phone: string;
   role?: string;
   wallet?: number;
-}
+};
 
 // Partial interfaces for API operations
 export type CreateUserModel = Omit<UserModel, 'id'>;

@@ -1,5 +1,3 @@
-import type { ProductModel } from './ProductModel';
-
 export interface CartItemModel {
   id: string;
   product: string; // Product ID
@@ -7,14 +5,14 @@ export interface CartItemModel {
   product_price: number;
   quantity: number;
   subtotal: number;
-}
+};
 
 export interface CreateCartItemModel {
   product_id: string;
   quantity: number;
-}
+};
 
 export interface UpdateCartItemModel {
   product_id: string;
   quantity: number;
-} 
+};

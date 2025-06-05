@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import ProductCard from '../components/ProductCard';
-import { getProducts, getCategories } from '../api';
-import type { ProductModel } from '../models/ProductModel';
-import type { CategoryModel } from '../models/CategoryModel';
+
+import { getProducts, getCategories } from "../api";
+
+import type { ProductModel } from "../models/ProductModel";
+import type { CategoryModel } from "../models/CategoryModel";
+
+import ProductCard from "../components/ProductCard";
 
 export default function ProductCatalog() {
   const [search, setSearch] = useState("");
@@ -14,11 +17,11 @@ export default function ProductCatalog() {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch categories on component mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const categoriesData = await getCategories();
+
         setCategories(categoriesData);
       } catch (err) {
         console.error('Error loading categories:', err);
@@ -28,17 +31,20 @@ export default function ProductCatalog() {
     fetchCategories();
   }, []);
 
-  // Fetch products whenever categories selection changes
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
+
       try {
         const productsData = await getProducts(selectedCategories.length > 0 ? selectedCategories : undefined);
+
         setProducts(productsData);
+
         setError(null);
       } catch (err) {
-        setError('Failed to load products. Please try again later.');
-        console.error('Error loading products:', err);
+        console.error("Error loading products:", err);
+
+        setError("Failed to load products. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -69,6 +75,7 @@ export default function ProductCatalog() {
   const getSelectedCategoryNames = () => {
     return selectedCategories.map(id => {
       const category = categories.find(cat => cat.id === id);
+      
       return category ? category.name : id;
     });
   };
@@ -81,9 +88,10 @@ export default function ProductCatalog() {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -105,9 +113,10 @@ export default function ProductCatalog() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <h2 className="text-3xl font-semibold mb-6 text-center">Product Catalog</h2>
+      <h2 className="text-3xl font-semibold mb-6 text-center">
+        Product Catalog
+      </h2>
       
-      {/* Search and Filter Controls */}
       <div className="mb-6 space-y-4">
         <input
           type="text"
@@ -117,7 +126,6 @@ export default function ProductCatalog() {
           onChange={e => setSearch(e.target.value)}
         />
         
-        {/* Multi-select Category Filter */}
         <div className="relative" ref={dropdownRef}>
           <div
             className="p-2 border rounded cursor-pointer bg-white flex justify-between items-center"
@@ -128,8 +136,9 @@ export default function ProductCatalog() {
                 ? "Select Categories" 
                 : `${selectedCategories.length} categories selected`}
             </span>
+
             <svg 
-              className={`w-4 h-4 transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 transition-transform ${showCategoryDropdown ? "rotate-180" : ""}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -149,9 +158,10 @@ export default function ProductCatalog() {
                   <input
                     type="checkbox"
                     checked={selectedCategories.includes(category.id)}
-                    onChange={() => {}} // Handled by onClick
+                    onChange={() => {}}
                     className="mr-2"
                   />
+
                   <span>{category.name}</span>
                 </div>
               ))}
@@ -159,16 +169,19 @@ export default function ProductCatalog() {
           )}
         </div>
         
-        {/* Selected Categories Display and Controls */}
         {selectedCategories.length > 0 && (
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm text-gray-600">Selected:</span>
+            <span className="text-sm text-gray-600">
+              Selected:
+            </span>
+
             {getSelectedCategoryNames().map((name, index) => (
               <span
                 key={selectedCategories[index]}
                 className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm flex items-center"
               >
                 {name}
+
                 <button
                   onClick={() => handleCategoryToggle(selectedCategories[index])}
                   className="ml-1 text-blue-600 hover:text-blue-800"
@@ -177,6 +190,7 @@ export default function ProductCatalog() {
                 </button>
               </span>
             ))}
+
             <button
               onClick={clearAllCategories}
               className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300 transition"
@@ -187,14 +201,12 @@ export default function ProductCatalog() {
         )}
       </div>
 
-      {/* Loading indicator for category filter changes */}
       {loading && (
         <div className="text-center text-gray-600 mb-4">
           <p>Loading products...</p>
         </div>
       )}
 
-      {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product: ProductModel) => (
@@ -207,7 +219,6 @@ export default function ProductCatalog() {
         )}
       </div>
       
-      {/* Results count */}
       <div className="mt-4 text-center text-gray-600">
         Showing {filteredProducts.length} products
         {selectedCategories.length > 0 && (
@@ -216,4 +227,4 @@ export default function ProductCatalog() {
       </div>
     </div>
   );
-}
+};

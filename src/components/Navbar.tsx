@@ -1,6 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
-import { logout } from '../api';
+import { Link, useNavigate } from "react-router-dom";
+
+import { useCart } from "../contexts/CartContext";
+
+import { logout } from "../api";
 
 export default function Navbar() {
   const { getCartItemCount, clearCart } = useCart();
@@ -32,7 +34,7 @@ export default function Navbar() {
             <Link to="/products" className="text-white hover:text-gray-200">
               Products
             </Link>
-            {/* Admin Dashboard link for admin */}
+
             {isLoggedIn && userRole === "admin" && (
               <>
                 <Link to="/admin" className="text-white hover:text-gray-200">
@@ -90,6 +92,7 @@ export default function Navbar() {
               <Link to="/cart" className="text-white hover:text-gray-200 relative">
                 <span className="flex items-center">
                   Cart
+
                   {cartItemCount > 0 && (
                     <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
                       {cartItemCount}
@@ -98,6 +101,7 @@ export default function Navbar() {
                 </span>
               </Link>
             )}
+
             {isLoggedIn ? (
               <>
                 <span className="text-white">Welcome, {username}</span>
@@ -123,4 +127,4 @@ export default function Navbar() {
       </div>
     </nav>
   );
-}
+};

@@ -1,5 +1,5 @@
-import type { OrderItemModel } from './OrderItemModel';
-import type { ShipmentModel } from './ShipmentModel';
+import type { OrderItemModel } from "./OrderItemModel";
+import type { ShipmentModel } from "./ShipmentModel";
 
 export interface OrderModel {
   id: number;
@@ -13,4 +13,4 @@ export interface OrderModel {
   shipping_address?: string;
   shipping_city?: string;
   shipping_postal_code?: string;
-} 
+};

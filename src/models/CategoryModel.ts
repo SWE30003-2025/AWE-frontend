@@ -5,4 +5,4 @@ export interface CategoryModel {
   parentCategory: string | null;
   parent_name?: string;
   children: CategoryModel[];
-} 
+};

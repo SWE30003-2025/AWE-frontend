@@ -1,11 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
+
 import type { OrderModel } from "../models/OrderModel";
 
 export default function OrderConfirmation() {
   const location = useLocation();
   const order: OrderModel | undefined = location.state?.order;
   
-  // Fallback for backward compatibility
   const orderId = order?.id || location.state?.orderId;
 
   return (
@@ -27,20 +27,39 @@ export default function OrderConfirmation() {
         
         {orderId && (
           <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-600">Order ID</p>
-            <p className="text-lg font-mono font-semibold text-gray-900">{orderId}</p>
+            <p className="text-sm text-gray-600">
+              Order ID
+            </p>
+
+            <p className="text-lg font-mono font-semibold text-gray-900">
+              {orderId}
+            </p>
           </div>
         )}
         
         {order?.shipment && (
           <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-600">Tracking Number</p>
-            <p className="text-lg font-mono font-semibold text-blue-600">{order.shipment.tracking_number}</p>
+            <p className="text-sm text-gray-600">
+              Tracking Number
+            </p>
+
+            <p className="text-lg font-mono font-semibold text-blue-600">
+              {order.shipment.tracking_number}
+            </p>
+
             <div className="mt-3 text-sm text-gray-600">
-              <p><span className="font-medium">Carrier:</span> {order.shipment.carrier}</p>
-              <p><span className="font-medium">Status:</span> <span className="capitalize">{order.shipment.status}</span></p>
+              <p>
+                <span className="font-medium">Carrier:</span> {order.shipment.carrier}
+              </p>
+
+              <p>
+                <span className="font-medium">Status:</span> <span className="capitalize">{order.shipment.status}</span>
+              </p>
+
               {order.shipment.estimated_delivery && (
-                <p><span className="font-medium">Estimated Delivery:</span> {new Date(order.shipment.estimated_delivery).toLocaleDateString()}</p>
+                <p>
+                  <span className="font-medium">Estimated Delivery:</span> {new Date(order.shipment.estimated_delivery).toLocaleDateString()}
+                </p>
               )}
             </div>
           </div>
@@ -50,9 +69,11 @@ export default function OrderConfirmation() {
           <p className="text-sm text-gray-600">
             🚚 Your order is being prepared for shipment
           </p>
+
           <p className="text-sm text-gray-600">
             📧 You can track your order status in your order history
           </p>
+
           {order?.shipment?.tracking_number && (
             <p className="text-sm text-gray-600">
               📦 Track your package with tracking number: <span className="font-mono font-medium">{order.shipment.tracking_number}</span>
@@ -67,6 +88,7 @@ export default function OrderConfirmation() {
           >
             View My Orders
           </Link>
+
           <Link 
             to="/products" 
             className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-medium"
@@ -77,4 +99,4 @@ export default function OrderConfirmation() {
       </div>
     </div>
   );
-}
+};
