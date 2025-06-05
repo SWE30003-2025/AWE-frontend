@@ -25,7 +25,6 @@ export default function ShipmentDashboard() {
       return;
     }
 
-    // Fetch dashboard data
     fetchDashboardData();
   }, [isLoggedIn, userRole, navigate]);
 
@@ -98,7 +97,6 @@ export default function ShipmentDashboard() {
         </p>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
@@ -131,7 +129,6 @@ export default function ShipmentDashboard() {
         ))}
       </div>
 
-      {/* Recent Shipments */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Recent Shipments</h2>
@@ -191,17 +188,6 @@ export default function ShipmentDashboard() {
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Refresh Button */}
-      <div className="mt-6 flex justify-end">
-        <button
-          onClick={fetchDashboardData}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          disabled={loading}
-        >
-          {loading ? 'Refreshing...' : 'Refresh Data'}
-        </button>
       </div>
     </div>
   );

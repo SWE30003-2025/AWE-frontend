@@ -5,8 +5,9 @@ export interface ProductModel {
   price: number;
   stock: number;
   category: string;
+  is_active: boolean;
 }
 
 // Partial interfaces for API operations
-export type CreateProductModel = Omit<ProductModel, "id">;
-export type UpdateProductModel = Partial<ProductModel>;
+export type CreateProductModel = Omit<ProductModel, "id" | "is_active">;
+export type UpdateProductModel = Partial<Omit<ProductModel, "id" | "is_active">>;

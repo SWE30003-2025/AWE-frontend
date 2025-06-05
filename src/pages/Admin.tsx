@@ -1,6 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { getProducts, createProduct, updateProduct, deleteProduct, getSalesAnalytics } from '../api';
+import { getProducts, createProduct, updateProduct, enableProduct, disableProduct, getSalesAnalytics, getCategories } from '../api';
 import type { ProductModel } from '../models/ProductModel';
+import type { CategoryModel } from '../models/CategoryModel';
 import toast from 'react-hot-toast';
 
 interface ProductForm {
@@ -13,6 +14,7 @@ interface ProductForm {
 
 export default function Admin() {
   const [products, setProducts] = useState<ProductModel[]>([]);
+  const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [form, setForm] = useState<ProductForm>({
     name: "",
     description: "",
@@ -22,11 +24,27 @@ export default function Admin() {
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<any>(null);
+  const [showInactive, setShowInactive] = useState(false);
 
   useEffect(() => {
-    getProducts().then(setProducts);
+    fetchProducts();
+    getCategories().then(setCategories);
     getSalesAnalytics().then(setAnalytics).catch(() => setAnalytics(null));
-  }, []);
+  }, [showInactive]);
+
+  const fetchProducts = async () => {
+    try {
+      const allProducts = await getProducts();
+      if (showInactive) {
+        setProducts(allProducts);
+      } else {
+        setProducts(allProducts.filter(p => p.is_active));
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast.error('Failed to load products');
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -47,24 +65,36 @@ export default function Admin() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleEnable = async (id: string) => {
     try {
-      await deleteProduct(id);
-      setProducts(products.filter(p => p.id !== id));
-      toast.success("Product deleted!");
+      const updatedProduct = await enableProduct(id);
+      setProducts(products.map(p => p.id === id ? updatedProduct : p));
+      toast.success("Product enabled!");
     } catch {
-      toast.error("Failed to delete product");
+      toast.error("Failed to enable product");
+    }
+  };
+
+  const handleDisable = async (id: string) => {
+    try {
+      const updatedProduct = await disableProduct(id);
+      setProducts(products.map(p => p.id === id ? updatedProduct : p));
+      toast.success("Product disabled!");
+    } catch {
+      toast.error("Failed to disable product");
     }
   };
 
   const handleEdit = (product: ProductModel) => {
     setEditingId(product.id);
+    // Find the category ID for the current category name
+    const categoryObj = categories.find(cat => cat.name === product.category);
     setForm({
       name: product.name,
       description: product.description,
       price: product.price.toString(),
       stock: product.stock?.toString() ?? "",
-      category: product.category,
+      category: categoryObj?.id || "",
     });
   };
 
@@ -112,6 +142,18 @@ export default function Admin() {
         </div>
       )}
 
+      <div className="mb-4 flex items-center gap-4">
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={(e) => setShowInactive(e.target.checked)}
+            className="mr-2"
+          />
+          Show inactive products
+        </label>
+      </div>
+
       <form onSubmit={editingId ? handleUpdate : handleSubmit} className="mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
@@ -122,6 +164,19 @@ export default function Admin() {
             className="border p-2 rounded"
             required
           />
+          <select
+            value={form.category}
+            onChange={e => setForm({ ...form, category: e.target.value })}
+            className="border p-2 rounded"
+            required
+          >
+            <option value="">Select Category</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
           <input
             type="number"
             placeholder="Price"
@@ -140,51 +195,69 @@ export default function Admin() {
             min={0}
             required
           />
-          <input
-            type="text"
-            placeholder="Category"
-            value={form.category}
-            onChange={e => setForm({ ...form, category: e.target.value })}
-            className="border p-2 rounded"
-            required
+          <textarea
+            placeholder="Description"
+            value={form.description}
+            onChange={e => setForm({ ...form, description: e.target.value })}
+            className="border p-2 rounded md:col-span-2"
+            rows={3}
           />
         </div>
-        <textarea
-          placeholder="Description"
-          value={form.description}
-          onChange={e => setForm({ ...form, description: e.target.value })}
-          className="border p-2 rounded w-full mt-4"
-          rows={3}
-        />
         <button
           type="submit"
           className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700"
         >
           {editingId ? "Update Product" : "Add Product"}
         </button>
+        {editingId && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditingId(null);
+              setForm({ name: "", description: "", price: "", stock: "", category: "" });
+            }}
+            className="bg-gray-500 text-white px-4 py-2 rounded mt-4 ml-2 hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {products.map(prod => (
-          <div key={prod.id} className="border rounded p-4">
-            <h3 className="font-semibold">{prod.name}</h3>
+          <div key={prod.id} className={`border rounded p-4 ${!prod.is_active ? 'bg-gray-100 opacity-75' : 'bg-white'}`}>
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-semibold">{prod.name}</h3>
+              <span className={`px-2 py-1 text-xs rounded ${prod.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                {prod.is_active ? 'Active' : 'Inactive'}
+              </span>
+            </div>
             <p className="text-gray-600">{prod.description}</p>
             <p className="font-bold text-blue-700">${prod.price}</p>
             <p className="text-gray-800">Stock: {prod.stock}</p>
             <p className="text-gray-600">Category: {prod.category}</p>
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex gap-2 flex-wrap">
               <button
                 onClick={() => handleEdit(prod)}
                 className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
               >
                 Edit
               </button>
-              <button
-                onClick={() => handleDelete(prod.id)}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
-              >
-                Delete
-              </button>
+              {prod.is_active ? (
+                <button
+                  onClick={() => handleDisable(prod.id)}
+                  className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-700"
+                >
+                  Disable
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleEnable(prod.id)}
+                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                >
+                  Enable
+                </button>
+              )}
             </div>
           </div>
         ))}

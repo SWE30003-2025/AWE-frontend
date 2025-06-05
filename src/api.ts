@@ -82,7 +82,12 @@ export async function getProduct(id: string): Promise<ProductModel> {
 
 export async function createProduct(product: CreateProductModel): Promise<ProductModel> {
   try {
-    const response = await api.post("/api/product", product);
+    const { category, ...productData } = product;
+    const payload = {
+      ...productData,
+      category_id: category || null
+    };
+    const response = await api.post("/api/product/", payload);
     return response.data;
   } catch (error) {
     console.error("Error creating product:", error);
@@ -92,7 +97,12 @@ export async function createProduct(product: CreateProductModel): Promise<Produc
 
 export async function updateProduct(id: string, product: UpdateProductModel): Promise<ProductModel> {
   try {
-    const response = await api.put(`/api/product/${id}`, product);
+    const { category, ...productData } = product;
+    const payload = {
+      ...productData,
+      category_id: category || null
+    };
+    const response = await api.put(`/api/product/${id}/`, payload);
     return response.data;
   } catch (error) {
     console.error("Error updating product:", error);
@@ -100,11 +110,22 @@ export async function updateProduct(id: string, product: UpdateProductModel): Pr
   }
 }
 
-export async function deleteProduct(id: string): Promise<void> {
+export async function enableProduct(id: string): Promise<ProductModel> {
   try {
-    await api.delete(`/api/product/${id}`);
+    const response = await api.post(`/api/product/${id}/enable/`);
+    return response.data.product;
   } catch (error) {
-    console.error("Error deleting product:", error);
+    console.error("Error enabling product:", error);
+    throw error;
+  }
+}
+
+export async function disableProduct(id: string): Promise<ProductModel> {
+  try {
+    const response = await api.post(`/api/product/${id}/disable/`);
+    return response.data.product;
+  } catch (error) {
+    console.error("Error disabling product:", error);
     throw error;
   }
 }
