@@ -55,13 +55,24 @@ export async function getCategories(): Promise<CategoryModel[]> {
   }
 }
 
-export async function getProducts(categories?: string[]): Promise<ProductModel[]> {
+export async function getProducts(categories?: string[], includeInactive?: boolean): Promise<ProductModel[]> {
   try {
     let url = "/api/product";
+    const queryParams = new URLSearchParams();
+    
     if (categories && categories.length > 0) {
-      const categoryParams = categories.join(',');
-      url += `?categories=${encodeURIComponent(categoryParams)}`;
+      const categoryParams = categories.join(",");
+      queryParams.append("categories", categoryParams);
     }
+    
+    if (includeInactive) {
+      queryParams.append("include_inactive", "true");
+    }
+    
+    if (queryParams.toString()) {
+      url += `?${queryParams.toString()}`;
+    }
+    
     const response = await api.get(url);
     return response.data;
   } catch (error) {
@@ -112,7 +123,7 @@ export async function updateProduct(id: string, product: UpdateProductModel): Pr
 
 export async function enableProduct(id: string): Promise<ProductModel> {
   try {
-    const response = await api.post(`/api/product/${id}/enable/`);
+    const response = await api.put(`/api/product/${id}/enable/`);
     return response.data.product;
   } catch (error) {
     console.error("Error enabling product:", error);
@@ -122,7 +133,7 @@ export async function enableProduct(id: string): Promise<ProductModel> {
 
 export async function disableProduct(id: string): Promise<ProductModel> {
   try {
-    const response = await api.post(`/api/product/${id}/disable/`);
+    const response = await api.put(`/api/product/${id}/disable/`);
     return response.data.product;
   } catch (error) {
     console.error("Error disabling product:", error);

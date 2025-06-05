@@ -24,22 +24,18 @@ export default function Admin() {
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<any>(null);
-  const [showInactive, setShowInactive] = useState(false);
 
   useEffect(() => {
     fetchProducts();
     getCategories().then(setCategories);
     getSalesAnalytics().then(setAnalytics).catch(() => setAnalytics(null));
-  }, [showInactive]);
+  }, []);
 
   const fetchProducts = async () => {
     try {
-      const allProducts = await getProducts();
-      if (showInactive) {
-        setProducts(allProducts);
-      } else {
-        setProducts(allProducts.filter(p => p.is_active));
-      }
+      // Admin should always see all products (active and inactive)
+      const allProducts = await getProducts(undefined, true);
+      setProducts(allProducts);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');
@@ -68,20 +64,26 @@ export default function Admin() {
   const handleEnable = async (id: string) => {
     try {
       const updatedProduct = await enableProduct(id);
-      setProducts(products.map(p => p.id === id ? updatedProduct : p));
+      setProducts(products.map(p => p.id === id ? { ...p, ...updatedProduct } : p));
       toast.success("Product enabled!");
-    } catch {
+    } catch (error) {
+      console.error("Error enabling product:", error);
       toast.error("Failed to enable product");
+      // Refresh products to ensure consistency
+      fetchProducts();
     }
   };
 
   const handleDisable = async (id: string) => {
     try {
       const updatedProduct = await disableProduct(id);
-      setProducts(products.map(p => p.id === id ? updatedProduct : p));
+      setProducts(products.map(p => p.id === id ? { ...p, ...updatedProduct } : p));
       toast.success("Product disabled!");
-    } catch {
+    } catch (error) {
+      console.error("Error disabling product:", error);
       toast.error("Failed to disable product");
+      // Refresh products to ensure consistency
+      fetchProducts();
     }
   };
 
@@ -142,17 +144,7 @@ export default function Admin() {
         </div>
       )}
 
-      <div className="mb-4 flex items-center gap-4">
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={showInactive}
-            onChange={(e) => setShowInactive(e.target.checked)}
-            className="mr-2"
-          />
-          Show inactive products
-        </label>
-      </div>
+
 
       <form onSubmit={editingId ? handleUpdate : handleSubmit} className="mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -225,11 +217,11 @@ export default function Admin() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {products.map(prod => (
-          <div key={prod.id} className={`border rounded p-4 ${!prod.is_active ? 'bg-gray-100 opacity-75' : 'bg-white'}`}>
+          <div key={prod.id} className={`border rounded p-4 ${!(prod.is_active ?? true) ? 'bg-gray-100 opacity-75' : 'bg-white'}`}>
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-semibold">{prod.name}</h3>
-              <span className={`px-2 py-1 text-xs rounded ${prod.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                {prod.is_active ? 'Active' : 'Inactive'}
+              <span className={`px-2 py-1 text-xs rounded ${(prod.is_active ?? true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                {(prod.is_active ?? true) ? 'Active' : 'Inactive'}
               </span>
             </div>
             <p className="text-gray-600">{prod.description}</p>
@@ -243,7 +235,7 @@ export default function Admin() {
               >
                 Edit
               </button>
-              {prod.is_active ? (
+              {(prod.is_active ?? true) ? (
                 <button
                   onClick={() => handleDisable(prod.id)}
                   className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-700"
