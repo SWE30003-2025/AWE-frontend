@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
-import { placeOrder, getCurrentUser } from '../api';
+import { placeOrder, getCurrentUser, payInvoice } from '../api';
 import toast from 'react-hot-toast';
 import type { UserModel } from '../models/UserModel';
 
@@ -82,20 +82,48 @@ export default function Checkout() {
         postal_code: form.postal,
       };
 
-      const order = await placeOrder(shippingInfo, payNow);
+      const orderResponse = await placeOrder(shippingInfo);
 
-      if (payNow) {
-        toast.success('Order placed and paid successfully!');
+      let finalOrder: any = orderResponse;
+
+      if (payNow && (orderResponse as any).invoice?.id) {
+        try {
+          const paymentResponse = await payInvoice((orderResponse as any).invoice.id);
+          
+          finalOrder = {
+            ...orderResponse,
+            payment_status: 'paid',
+            invoice: {
+              ...(orderResponse as any).invoice,
+              status: 'paid'
+            },
+            payment: paymentResponse.payment,
+            receipt: paymentResponse.receipt,
+            shipment: paymentResponse.shipment
+          };
+
+          toast.success('Order placed and paid successfully!');
+        } catch (paymentErr: any) {
+          console.error('Payment error:', paymentErr);
+          const paymentErrorMessage = paymentErr.response?.data?.error || 'Payment failed after order placement.';
+          toast.error(`Order placed but ${paymentErrorMessage} You can pay later from My Orders.`);
+          
+          finalOrder = orderResponse;
+        }
       } else {
         toast.success('Order placed successfully! You can pay later from My Orders.');
       }
+
       clearCart();
-      // Navigate to order confirmation with full order data
+      
       navigate('/order-confirmation', { 
-        state: { order, paidNow: payNow } 
+        state: { 
+          order: finalOrder, 
+          paidNow: payNow && finalOrder.payment_status === 'paid'
+        } 
       });
     } catch (err: any) {
-      console.error(err);
+      console.error('Order placement error:', err);
       const errorMessage = err.response?.data?.error || 'Failed to place order. Please try again.';
       toast.error(errorMessage);
     } finally {

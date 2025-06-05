@@ -258,13 +258,9 @@ export async function placeOrder(shippingInfo: {
   address: string;
   city: string;
   postal_code: string;
-}, payNow: boolean = false): Promise<OrderModel> {
+}): Promise<OrderModel> {
   try {
-    const payload = {
-      ...shippingInfo,
-      pay_now: payNow
-    };
-    const response = await api.post("/api/shopping-cart/place-order/", payload);
+    const response = await api.post("/api/shopping-cart/place-order/", shippingInfo);
     return response.data;
   } catch (error) {
     console.error("Error placing order:", error);
