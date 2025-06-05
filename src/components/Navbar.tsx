@@ -66,8 +66,13 @@ export default function Navbar() {
               </Link>
             )}
 
+            {isLoggedIn && userRole === "statistics_manager" && (
+              <Link to="/admin-analytics" className="text-white hover:text-gray-200">
+                Sales Analytics
+              </Link>
+            )}
 
-            {isLoggedIn && userRole !== "admin" && userRole !== "shipment_manager" && (
+            {isLoggedIn && userRole !== "admin" && userRole !== "shipment_manager" && userRole !== "statistics_manager" && (
               <Link to="/my-orders" className="text-white hover:text-gray-200">
                 My Orders
               </Link>

@@ -27,7 +27,7 @@ export default function AdminAnalytics() {
       return;
     }
 
-    if (userRole !== "admin") {
+    if (userRole !== "admin" && userRole !== "statistics_manager") {
       toast.error("You don't have permission to access this page");
       navigate("/");
       return;
