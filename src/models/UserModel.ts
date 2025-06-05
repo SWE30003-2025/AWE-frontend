@@ -5,6 +5,7 @@ export interface UserModel {
   password?: string;
   firstName: string;
   lastName: string;
+  phone: string;
   role?: string;
   wallet?: number;
 }

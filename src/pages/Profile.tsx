@@ -8,6 +8,7 @@ interface ProfileForm {
   firstName: string;
   lastName: string;
   email: string;
+  phone: string;
   newPassword?: string;
 }
 
@@ -22,6 +23,7 @@ export default function Profile() {
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     newPassword: "",
   });
   const [walletForm, setWalletForm] = useState<WalletForm>({
@@ -40,6 +42,7 @@ export default function Profile() {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
+          phone: user.phone || "",
           newPassword: "",
         });
       }
@@ -58,6 +61,7 @@ export default function Profile() {
       const updatePayload: any = {
         firstName: form.firstName,
         lastName: form.lastName,
+        phone: form.phone,
       };
       if (form.newPassword && form.newPassword.length > 0) {
         updatePayload.password = form.newPassword;
@@ -172,11 +176,21 @@ export default function Profile() {
           />
         </div>
         <div>
+          <label className="block text-gray-700 mb-2">Phone Number</label>
+          <input
+            type="tel"
+            value={form.phone}
+            onChange={e => setForm({ ...form, phone: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        <div>
           <label className="block text-gray-700 mb-2">Email</label>
           <input
             type="email"
             value={form.email}
-            disabled // don't allow change here
+            disabled
             className="w-full p-2 border rounded bg-gray-100"
             required
           />

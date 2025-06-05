@@ -10,7 +10,7 @@ export default function Register() {
     password: "",
     firstName: "",
     lastName: "",
-
+    phone: "",
   });
   const navigate = useNavigate();
 
@@ -65,6 +65,16 @@ export default function Register() {
             type="email"
             value={form.email}
             onChange={e => setForm({ ...form, email: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-2">Phone Number</label>
+          <input
+            type="tel"
+            value={form.phone}
+            onChange={e => setForm({ ...form, phone: e.target.value })}
             className="w-full p-2 border rounded"
             required
           />
