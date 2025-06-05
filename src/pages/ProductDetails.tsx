@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getProduct } from '../api';
-import type { ProductModel } from '../models/ProductModel';
-import { useCart } from '../contexts/CartContext';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { getProduct } from "../api";
+import type { ProductModel } from "../models/ProductModel";
+import { useCart } from "../contexts/CartContext";
+import toast from "react-hot-toast";
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
@@ -22,8 +22,9 @@ export default function ProductDetails() {
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) {
-        setError('Product ID not found');
+        setError("Product ID not found");
         setLoading(false);
+
         return;
       }
 
@@ -33,8 +34,8 @@ export default function ProductDetails() {
         setProduct(productData);
         setError(null);
       } catch (err) {
-        setError('Failed to load product details. Please try again later.');
-        console.error('Error loading product:', err);
+        setError("Failed to load product details. Please try again later.");
+        console.error("Error loading product:", err);
       } finally {
         setLoading(false);
       }
@@ -57,11 +58,10 @@ export default function ProductDetails() {
     }
 
     if (product) {
-      // Add the product multiple times based on selected quantity
       for (let i = 0; i < quantity; i++) {
         addToCart(product);
       }
-      toast.success(`Added ${quantity} item${quantity > 1 ? 's' : ''} to cart!`);
+      toast.success(`Added ${quantity} item${quantity > 1 ? "s" : ""} to cart!`);
     }
   };
 
@@ -76,7 +76,7 @@ export default function ProductDetails() {
   };
 
   const handleBackToCatalog = () => {
-    navigate('/catalog');
+    navigate("/catalog");
   };
 
   if (loading) {
@@ -117,7 +117,6 @@ export default function ProductDetails() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Breadcrumb */}
       <div className="mb-6">
         <button
           onClick={handleBackToCatalog}
@@ -130,18 +129,15 @@ export default function ProductDetails() {
         </button>
       </div>
 
-      {/* Product Details */}
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="p-8">
           <div className="grid md:grid-cols-2 gap-8">
-            {/* Product Image Placeholder */}
             <div className="bg-gray-200 rounded-lg h-96 flex items-center justify-center">
               <svg className="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
 
-            {/* Product Information */}
             <div className="space-y-6">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
