@@ -12,6 +12,13 @@ interface ExtendedOrderModel extends OrderModel {
     amount_due: string;
     status: string;
     due_date: string;
+    created_at?: string;
+    receipts?: Array<{
+      id: string;
+      receipt_number: string;
+      amount_paid: string;
+      created_at: string;
+    }>;
   };
   receipts?: Array<{
     id: string;
@@ -251,10 +258,29 @@ export default function MyOrders() {
                           </p>
                           <p className="text-sm text-gray-600">
                             Due Date: {new Date(order.invoice.due_date).toLocaleDateString()}
-                            {isOverdue(order.invoice.due_date) && (
+                            {isOverdue(order.invoice.due_date) && order.invoice.status === 'pending' && (
                               <span className="text-red-600 font-medium ml-1">(Overdue)</span>
                             )}
                           </p>
+                          {order.invoice.receipts && order.invoice.receipts.length > 0 && (
+                            <div className="mt-3 border-t border-gray-200 pt-3">
+                              <p className="text-sm font-medium text-gray-700 mb-2">Payment History:</p>
+                              {order.invoice.receipts.map((receipt) => (
+                                <div key={receipt.id} className="text-sm text-gray-600">
+                                  <p className="flex justify-between items-center">
+                                    <span>
+                                      <span className="font-mono text-xs">{receipt.receipt_number}</span>
+                                      <span className="mx-2">•</span>
+                                      <span>{new Date(receipt.created_at).toLocaleDateString()}</span>
+                                    </span>
+                                    <span className="font-medium text-green-600">
+                                      ${parseFloat(receipt.amount_paid).toFixed(2)}
+                                    </span>
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                         
                         {order.invoice.status === 'pending' && (
@@ -275,20 +301,6 @@ export default function MyOrders() {
                           </div>
                         )}
                       </div>
-                    </div>
-                  )}
-
-                  {/* Receipts */}
-                  {order.receipts && order.receipts.length > 0 && (
-                    <div className="bg-green-50 rounded p-4">
-                      <h5 className="font-medium text-green-800 mb-2">Payment Receipts:</h5>
-                      {order.receipts.map((receipt, idx) => (
-                        <div key={idx} className="text-sm text-green-700">
-                          <span className="font-medium">#{receipt.receipt_number}</span> - 
-                          ${parseFloat(receipt.amount_paid).toFixed(2)} paid on{' '}
-                          {new Date(receipt.created_at).toLocaleDateString()}
-                        </div>
-                      ))}
                     </div>
                   )}
                 </div>
