@@ -44,24 +44,35 @@ export default function Navbar() {
                 <Link to="/admin-analytics" className="text-white hover:text-gray-200">
                   Sales Analytics
                 </Link>
+                <Link to="/inventory-management" className="text-white hover:text-gray-200">
+                  Inventory Management
+                </Link>
                 <Link to="/shipment-dashboard" className="text-white hover:text-gray-200">
                   Shipment Dashboard
                 </Link>
               </>
             )}
-            {/* Shipment Dashboard link for shipment managers */}
+
+            {isLoggedIn && userRole === "inventory_manager" && (
+              <Link to="/inventory-management" className="text-white hover:text-gray-200">
+                Inventory Management
+              </Link>
+            )}
+
+
             {isLoggedIn && userRole === "shipment_manager" && (
               <Link to="/shipment-dashboard" className="text-white hover:text-gray-200">
                 Shipment Dashboard
               </Link>
             )}
-            {/* Orders link: users see My Orders */}
+
+
             {isLoggedIn && userRole !== "admin" && userRole !== "shipment_manager" && (
               <Link to="/my-orders" className="text-white hover:text-gray-200">
                 My Orders
               </Link>
             )}
-            {/* Profile link for logged in users */}
+
             {isLoggedIn && (
               <Link to="/profile" className="text-white hover:text-gray-200">
                 Profile
@@ -70,7 +81,6 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Cart link only for customers */}
             {isLoggedIn && userRole === "customer" && (
               <Link to="/cart" className="text-white hover:text-gray-200 relative">
                 <span className="flex items-center">

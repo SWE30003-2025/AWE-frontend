@@ -15,6 +15,7 @@ import Admin from './pages/Admin';
 import AdminOrders from './pages/AdminOrders';
 import AdminAnalytics from './pages/AdminAnalytics'; 
 import ShipmentDashboard from './pages/ShipmentDashboard';
+import InventoryManagement from './pages/InventoryManagement';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
           <Route path="/admin-orders" element={<AdminOrders />} />
           <Route path="/admin-analytics" element={<AdminAnalytics />} />
           <Route path="/shipment-dashboard" element={<ShipmentDashboard />} />
+          <Route path="/inventory-management" element={<InventoryManagement />} />
         </Routes>
       </div>
     </Router>

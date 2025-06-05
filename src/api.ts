@@ -130,6 +130,36 @@ export async function disableProduct(id: string): Promise<ProductModel> {
   }
 }
 
+// ===== Inventory Management APIs =====
+
+export async function updateProductStock(id: string, amount: number): Promise<{
+  message: string;
+  product: ProductModel;
+  new_stock: number;
+}> {
+  try {
+    const response = await api.post(`/api/inventory/${id}/update_stock/`, { amount });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating product stock:", error);
+    throw error;
+  }
+}
+
+export async function getProductsForInventory(includeInactive: boolean = false): Promise<ProductModel[]> {
+  try {
+    let url = "/api/product";
+    if (includeInactive) {
+      url += "?include_inactive=true";
+    }
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching products for inventory:", error);
+    return [];
+  }
+}
+
 // ===== Order APIs =====
 
 export async function getOrders(): Promise<OrderModel[]> {
