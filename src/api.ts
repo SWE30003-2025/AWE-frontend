@@ -8,7 +8,7 @@ import type { ShoppingCartModel } from './models/ShoppingCartModel';
 import type { CartItemModel, CreateCartItemModel, UpdateCartItemModel } from './models/CartItemModel';
 
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "http://localhost:8080",
   headers: { "Content-Type": "application/json" },
 });
 
