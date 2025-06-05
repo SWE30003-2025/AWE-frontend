@@ -17,7 +17,7 @@ api.interceptors.request.use(
   (config) => {
     if (
       config.url &&
-      (config.url.endsWith("/signup") || config.url.endsWith("/login"))
+      (config.url.includes("/signup") || config.url.includes("/login"))
     ) {
       return config;
     }
@@ -155,7 +155,8 @@ export async function login(username: string, password: string): Promise<{ user:
 
 export async function register(user: CreateUserModel): Promise<UserModel> {
   try {
-    const response = await api.post('/api/user/signup', user);
+    console.log("register")
+    const response = await api.post('/api/user/signup/', user);
     return response.data;
   } catch (error) {
     console.error("Error registering:", error);
