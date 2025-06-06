@@ -179,9 +179,11 @@ export default function StatisticDashboard() {
           </div>
         </div>
 
-        <div className="mt-4 text-sm text-gray-600">
-          Showing data from {formatDate(stats.summary.period_start)} to {formatDate(stats.summary.period_end)}
-        </div>
+        {stats && stats.summary && (
+          <div className="mt-4 text-sm text-gray-600">
+            Showing data from {formatDate(stats.summary.period_start)} to {formatDate(stats.summary.period_end)}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -273,26 +275,32 @@ export default function StatisticDashboard() {
         </h2>
 
         <div className="space-y-4">
-          {stats.sales_by_period
-            .sort((a, b) => new Date(b.period).getTime() - new Date(a.period).getTime())
-            .map((periodData, index) => (
-            <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <h3 className="font-medium text-gray-900">
-                  {formatDate(periodData.period)}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {periodData.total_orders} orders
-                </p>
-              </div>
+          {stats.sales_by_period && stats.sales_by_period.length > 0 ? (
+            stats.sales_by_period
+              .sort((a, b) => new Date(b.period).getTime() - new Date(a.period).getTime())
+              .map((periodData, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-gray-900">
+                      {formatDate(periodData.period)}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {periodData.total_orders} orders
+                    </p>
+                  </div>
 
-              <div className="text-right">
-                <p className="text-lg font-semibold text-gray-900">
-                  {formatCurrency(periodData.total_sales)}
-                </p>
-              </div>
+                  <div className="text-right">
+                    <p className="text-lg font-semibold text-gray-900">
+                      {formatCurrency(periodData.total_sales)}
+                    </p>
+                  </div>
+                </div>
+              ))
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No sales data available for the selected period.</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
 
