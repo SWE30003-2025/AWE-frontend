@@ -366,7 +366,7 @@ export async function addToCart(product_id: string, quantity: number = 1): Promi
 
 export async function updateCartItem(product_id: string, quantity: number): Promise<CartItemModel | null> {
   try {
-    const response = await api.put("/api/shopping-cart/", {
+    const response = await api.put("/api/shopping-cart/update-item/", {
       product_id,
       quantity
     });
@@ -381,7 +381,7 @@ export async function updateCartItem(product_id: string, quantity: number): Prom
 
 export async function removeFromCart(product_id: string): Promise<void> {
   try {
-    await api.delete("/api/shopping-cart/", {
+    await api.delete("/api/shopping-cart/remove-item/", {
       data: { product_id }
     });
   } catch (error) {
