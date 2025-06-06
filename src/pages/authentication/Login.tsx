@@ -2,7 +2,7 @@ import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import { login } from "../api";
+import { login } from "../../api";
 
 interface LoginForm {
   username: string;

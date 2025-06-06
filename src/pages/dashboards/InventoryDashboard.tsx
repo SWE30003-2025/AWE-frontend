@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import { getProductsForInventory, updateProductStock } from "../api";
+import { getProductsForInventory, updateProductStock } from "../../api";
 
-import type { ProductModel } from "../models/ProductModel";
+import type { ProductModel } from "../../models/ProductModel";
 
 interface StockUpdateForm {
   productId: string;
@@ -12,7 +12,7 @@ interface StockUpdateForm {
   reason: string;
 };
 
-export default function InventoryManagement() {
+export default function InventoryDashboard() {
   const [products, setProducts] = useState<ProductModel[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]);
   const [loading, setLoading] = useState(true);

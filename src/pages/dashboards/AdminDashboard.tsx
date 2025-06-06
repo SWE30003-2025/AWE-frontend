@@ -10,10 +10,10 @@ import {
   disableProduct, 
   getSalesAnalytics, 
   getCategories 
-} from "../api";
+} from "../../api";
 
-import type { ProductModel } from "../models/ProductModel";
-import type { CategoryModel } from "../models/CategoryModel";
+import type { ProductModel } from "../../models/ProductModel";
+import type { CategoryModel } from "../../models/CategoryModel";
 
 interface ProductForm {
   name: string;
@@ -23,7 +23,7 @@ interface ProductForm {
   category: string;
 }
 
-export default function Admin() {
+export default function AdminDashboard() {
   const [products, setProducts] = useState<ProductModel[]>([]);
   const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [form, setForm] = useState<ProductForm>({

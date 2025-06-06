@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import { getSalesAnalytics } from "../api";
+import { getSalesAnalytics } from "../../api";
 
 interface SalesAnalytics {
   total_orders: number;
@@ -13,7 +13,7 @@ interface SalesAnalytics {
   }>;
 }
 
-export default function AdminAnalytics() {
+export default function StatisticDashboard() {
   const [stats, setStats] = useState<SalesAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();

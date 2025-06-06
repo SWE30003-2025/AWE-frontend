@@ -4,18 +4,18 @@ import Home from './pages/Home';
 import ProductCatalog from './pages/ProductCatalog';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Login from './pages/authentication/Login';
+import Register from './pages/authentication/Register';
 import Checkout from './pages/Checkout';
 import OrderConfirmation from './pages/OrderConfirmation';
 import MyOrders from './pages/MyOrders';
 import Profile from './pages/Profile';
 import OrderDetails from './pages/OrderDetails';
-import Admin from './pages/Admin';
-import AdminOrders from './pages/AdminOrders';
-import AdminAnalytics from './pages/AdminAnalytics'; 
-import ShipmentDashboard from './pages/ShipmentDashboard';
-import InventoryManagement from './pages/InventoryManagement';
+import AdminDashboard from './pages/dashboards/AdminDashboard';
+import AllOrders from './pages/dashboards/AllOrders';
+import StatisticDashboard from './pages/dashboards/StatisticDashboard'; 
+import ShipmentDashboard from './pages/dashboards/ShipmentDashboard';
+import InventoryDashboard from './pages/dashboards/InventoryDashboard';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -37,11 +37,11 @@ function App() {
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/order/:id" element={<OrderDetails />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin-orders" element={<AdminOrders />} />
-          <Route path="/admin-analytics" element={<AdminAnalytics />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin-orders" element={<AllOrders />} />
+          <Route path="/admin-analytics" element={<StatisticDashboard />} />
           <Route path="/shipment-dashboard" element={<ShipmentDashboard />} />
-          <Route path="/inventory-management" element={<InventoryManagement />} />
+          <Route path="/inventory-management" element={<InventoryDashboard />} />
         </Routes>
       </div>
     </Router>

@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import { getShipmentDashboard, updateShipmentStatus } from "../api";
+import { getShipmentDashboard, updateShipmentStatus } from "../../api";
 
-import type { ShipmentDashboardData, ShipmentModel } from "../models/ShipmentModel";
+import type { ShipmentDashboardData, ShipmentModel } from "../../models/ShipmentModel";
 
 export default function ShipmentDashboard() {
   const [dashboardData, setDashboardData] = useState<ShipmentDashboardData | null>(null);

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 
-import { getOrders } from "../api";
+import { getOrders } from "../../api";
 
-import type { OrderModel } from "../models/OrderModel";
+import type { OrderModel } from "../../models/OrderModel";
 
-export default function AdminOrders() {
+export default function AllOrders() {
   const [orders, setOrders] = useState<OrderModel[]>([]);
 
   useEffect(() => {

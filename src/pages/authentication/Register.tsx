@@ -2,7 +2,7 @@ import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import { register } from "../api";
+import { register } from "../../api";
 
 export default function Register() {
   const [form, setForm] = useState({
