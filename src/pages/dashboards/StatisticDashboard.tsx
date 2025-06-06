@@ -273,7 +273,9 @@ export default function StatisticDashboard() {
         </h2>
 
         <div className="space-y-4">
-          {stats.sales_by_period.map((periodData, index) => (
+          {stats.sales_by_period
+            .sort((a, b) => new Date(b.period).getTime() - new Date(a.period).getTime())
+            .map((periodData, index) => (
             <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
                 <h3 className="font-medium text-gray-900">
