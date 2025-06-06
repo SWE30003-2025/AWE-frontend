@@ -157,20 +157,20 @@ export default function AdminDashboard() {
           <h3 className="font-semibold mb-2">Sales Analytics</h3>
           
           <div>
-            Total Sales: <span className="font-bold">${analytics.total_sales?.toFixed(2)}</span>
+            Total Sales: <span className="font-bold">${analytics.summary?.total_revenue?.toFixed(2) || '0.00'}</span>
           </div>
 
           <div>
-            Total Orders: <span className="font-bold">{analytics.total_orders}</span>
+            Total Orders: <span className="font-bold">{analytics.summary?.total_orders || 0}</span>
           </div>
 
           <div className="mt-2">
             <span className="font-semibold">Popular Products:</span>
 
             <ul className="list-disc ml-6">
-              {analytics.popular_products && analytics.popular_products.length > 0 ? (
-                analytics.popular_products.map((p: any, idx: number) => (
-                  <li key={idx}>{p.product__name} - Sold: {p.total_sold}</li>
+              {analytics.top_products && analytics.top_products.length > 0 ? (
+                analytics.top_products.map((p: any, idx: number) => (
+                  <li key={idx}>{p.product_name} - Sold: {p.total_quantity}</li>
                 ))
               ) : (
                 <li>No popular products data available</li>
