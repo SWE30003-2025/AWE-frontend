@@ -218,13 +218,47 @@ export async function getOrders(): Promise<OrderModel[]> {
 }
 
 // Analytics (admin only)
-export async function getSalesAnalytics(): Promise<{
-  total_sales: number;
-  total_orders: number;
-  popular_products: Array<{ product__name: string; total_sold: number }>;
+export async function getSalesAnalytics(params?: {
+  period?: string;
+  start_date?: string;
+  end_date?: string;
+}): Promise<{
+  summary: {
+    period_start: string;
+    period_end: string;
+    total_orders: number;
+    total_revenue: number;
+    total_items_sold: number;
+    average_order_value: number;
+  };
+  sales_by_period: Array<{
+    period: string;
+    total_orders: number;
+    total_sales: number;
+  }>;
+  top_products: Array<{
+    product_id: string;
+    product_name: string;
+    category_name: string;
+    total_quantity: number;
+    total_revenue: number;
+  }>;
 }> {
   try {
-    const response = await api.get("/api/order/analytics/");
+    const queryParams = new URLSearchParams();
+    
+    if (params?.period) {
+      queryParams.append('period', params.period);
+    }
+    if (params?.start_date) {
+      queryParams.append('start_date', params.start_date);
+    }
+    if (params?.end_date) {
+      queryParams.append('end_date', params.end_date);
+    }
+
+    const url = `/api/order/analytics/${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await api.get(url);
 
     return response.data;
   } catch (error) {
